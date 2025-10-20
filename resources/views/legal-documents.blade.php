@@ -581,7 +581,7 @@
                     }
 
                     try {
-                        const res = await fetch('/legal-documents/create-folder', {
+                        const res = await fetch('{{ url('legal-documents/create-folder') }}', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
