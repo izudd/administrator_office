@@ -32,14 +32,26 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/legal-documents', [LegalDocumentController::class, 'index'])->name('legal-documents.index');
     Route::post('/legal-documents', [LegalDocumentController::class, 'store'])->name('legal-documents.store');
-    Route::delete('/legal-documents/{legalDocument}', [LegalDocumentController::class, 'destroy'])->name('legal-documents.destroy');
-    Route::get('/legal-documents/{folder}/files', [LegalDocumentController::class, 'getDocuments'])->name('legal-documents.files');
-    Route::post('/legal-documents/{folder}/upload', [LegalDocumentController::class, 'storeDocument'])->name('legal-documents.upload');
-    Route::post('/legal-documents/{folder}/delete', [LegalDocumentController::class, 'deleteFile'])->name('legal-documents.delete');
-    Route::post('/legal-documents/create-folder', [LegalDocumentController::class, 'createFolder'])->name('legal-documents.createFolder');
-    Route::get('/legal-documents/{folder}/preview/{filename}', [LegalDocumentController::class, 'previewFile'])
-    ->where('filename', '.*');  
+    
+    Route::get('/legal-documents/{folder}/files', [LegalDocumentController::class, 'getDocuments'])
+        ->where('folder', '.*')
+        ->name('legal-documents.files');
 
+    Route::post('/legal-documents/{folder}/upload', [LegalDocumentController::class, 'storeDocument'])
+        ->where('folder', '.*')
+        ->name('legal-documents.upload');
+
+    Route::post('/legal-documents/{folder}/delete', [LegalDocumentController::class, 'deleteFile'])
+        ->where('folder', '.*')
+        ->name('legal-documents.delete');
+
+    Route::post('/legal-documents/create-folder', [LegalDocumentController::class, 'createFolder'])
+        ->name('legal-documents.createFolder');
+
+    Route::get('/legal-documents/{folder}/preview/{filename}', [LegalDocumentController::class, 'previewFile'])
+        ->where('filename', '.*');
+
+    Route::delete('/legal-documents/{legalDocument}', [LegalDocumentController::class, 'destroy'])->name('legal-documents.destroy');
 });
 
 
