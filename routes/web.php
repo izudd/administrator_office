@@ -32,9 +32,9 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/legal-documents', [LegalDocumentController::class, 'index'])->name('legal-documents.index');
     Route::post('/legal-documents', [LegalDocumentController::class, 'store'])->name('legal-documents.store');
+
     
-    Route::get('/legal-documents/{folder}/files', [LegalDocumentController::class, 'getDocuments'])
-        ->where('folder', '.*')
+    Route::get('/legal-documents/folder/{folder}/files', [LegalDocumentController::class, 'getDocuments'])
         ->name('legal-documents.files');
 
     Route::post('/legal-documents/{folder}/upload', [LegalDocumentController::class, 'storeDocument'])
