@@ -36,22 +36,58 @@ class LegalDocumentController extends Controller
 
     public function getDocuments($folder)
     {
-        $decodedFolder = urldecode($folder);
-        $path = storage_path("app/public/legal-documents/{$decodedFolder}");
+        // ✅ Log untuk debug
+        Log::info('getDocuments called', [
+            'folder' => $folder,
+            'decoded' => urldecode($folder),
+            'user' => auth()->check() ? auth()->user()->email : 'not authenticated'
+        ]);
 
-        if (!is_dir($path)) {
-            return response()->json([]);
+        try {
+            $decodedFolder = urldecode($folder);
+
+            // Cari folder di database
+            $folderModel = LegalDocument::where('name', $decodedFolder)->first();
+
+            if (!$folderModel) {
+                Log::warning('Folder not found', [
+                    'looking_for' => $decodedFolder,
+                    'available' => LegalDocument::pluck('name')->toArray()
+                ]);
+                return response()->json([]);
+            }
+
+            // Ambil files dari database
+            $files = Document::where('folder_id', $folderModel->id)
+                ->get()
+                ->map(function ($doc) {
+                    return [
+                        'file_name' => $doc->file_name,
+                        'url' => asset('storage/' . $doc->file_path),
+                        'size' => $this->formatFileSize($doc->file_path),
+                    ];
+                });
+
+            Log::info('Files loaded', ['count' => $files->count()]);
+
+            return response()->json($files);
+        } catch (\Throwable $e) {
+            Log::error('getDocuments error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
 
-        $files = collect(File::files($path))->map(function ($file) use ($decodedFolder) {
-            return [
-                'file_name' => $file->getFilename(),
-                'url' => asset('storage/legal-documents/' . $decodedFolder . '/' . $file->getFilename()),
-                'size' => round($file->getSize() / 1024, 2) . ' KB',
-            ];
-        });
-
-        return response()->json($files);
+    private function formatFileSize($filePath)
+    {
+        $fullPath = storage_path('app/public/' . $filePath);
+        if (file_exists($fullPath)) {
+            $bytes = filesize($fullPath);
+            return round($bytes / 1024, 2) . ' KB';
+        }
+        return 'N/A';
     }
 
     public function createFolder(Request $request)

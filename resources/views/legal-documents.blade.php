@@ -438,24 +438,54 @@
                     if (!folderName) return;
                     this.loading = true;
                     this.files = [];
+
                     try {
                         const encoded = encodeURIComponent(folderName);
-                        const res = await fetch(`/legal-documents/${encoded}/files`);
+                        const url = `/legal-documents/${encoded}/files`;
+
+                        console.log('Loading files from:', url);
+
+                        const res = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            credentials: 'same-origin'
+                        });
+
+                        console.log('Response status:', res.status);
+                        console.log('Response headers:', Object.fromEntries(res.headers.entries()));
+
                         if (!res.ok) {
-                            console.error('loadFiles failed', res.status);
+                            const text = await res.text();
+                            console.error('Response body:', text);
+
+                            // Cek apakah redirect ke login
+                            if (res.status === 401 || res.url.includes('/login')) {
+                                this.showToast('error', 'Session Expired', 'Please login again');
+                                window.location.href = '/login';
+                                return;
+                            }
+
+                            this.showToast('error', 'Error', `Failed to load files: ${res.status}`);
                             this.files = [];
                             return;
                         }
+
                         const data = await res.json();
+                        console.log('Files loaded:', data);
+
                         this.files = data.map(f => ({
                             ...f,
                             url: f.url ? f.url : (f.file_path ? `/storage/${f.file_path}` : undefined)
                         }));
+
                         await new Promise(r => setTimeout(r, 250));
                     } catch (err) {
-                        console.error('loadFiles err', err);
+                        console.error('loadFiles error:', err);
+                        this.showToast('error', 'Error', 'Failed to load files: ' + err.message);
                         this.files = [];
-                        this.showToast('error', 'Error', 'Failed to load files');
                     } finally {
                         this.loading = false;
                     }
