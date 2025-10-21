@@ -441,7 +441,7 @@
 
                     try {
                         const encoded = encodeURIComponent(folderName);
-                        const url = `/legal-documents/folder/${encoded}/files`;
+                        const url = `/legal-documents/${encoded}/files`;
 
                         console.log('Loading files from:', url);
 
