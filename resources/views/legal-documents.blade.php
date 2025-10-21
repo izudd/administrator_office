@@ -497,6 +497,12 @@
                         return;
                     }
 
+                    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                    if (file.size > maxSize) {
+                        this.showToast('error', 'File Too Large', 'Maximum file size is 5MB');
+                        return;
+                    }
+
                     this.uploading = true;
                     this.progress = 0;
 
@@ -507,6 +513,8 @@
                     const encoded = encodeURIComponent(this.selectedFolder);
                     xhr.open('POST', `/legal-documents/${encoded}/upload`);
                     xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
+
+                    xhr.timeout = 300000;
 
                     xhr.upload.addEventListener('progress', (e) => {
                         if (e.lengthComputable) {
@@ -532,7 +540,15 @@
 
                     xhr.onerror = () => {
                         this.uploading = false;
-                        this.showToast('error', 'Error', 'Network error occurred');
+                        this.showToast('error', 'Network Error', 'Failed to connect to server');
+                        console.error('XHR error occurred');
+                    };
+
+                    // ✅ Handle timeout
+                    xhr.ontimeout = () => {
+                        this.uploading = false;
+                        this.showToast('error', 'Timeout', 'Upload took too long. Try a smaller file.');
+                        console.error('XHR timeout');
                     };
 
                     xhr.send(form);
