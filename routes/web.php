@@ -54,6 +54,16 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/legal-documents/{folder}/preview/{filename}', [LegalDocumentController::class, 'previewFile'])
         ->where('filename', '.*');
+        
+    // Rename folder
+    Route::post('/legal-documents/rename-folder', [LegalDocumentController::class, 'renameFolder'])
+        ->middleware('auth')
+        ->name('legal-documents.rename-folder');
+    
+    // Delete folder
+    Route::post('/legal-documents/delete-folder', [LegalDocumentController::class, 'deleteFolder'])
+        ->middleware('auth')
+        ->name('legal-documents.delete-folder');
     
     Route::delete('/legal-documents/{legalDocument}', [LegalDocumentController::class, 'destroy'])
         ->name('legal-documents.destroy');

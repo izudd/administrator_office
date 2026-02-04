@@ -114,7 +114,7 @@
             <li>📅 {{ date('l, d M Y') }}</li>
             <li>🏢 KAP Budiandru & Rekan</li>
             <li>📍 Jakarta, Indonesia</li>
-            <li>🕒 Office Hours: 09:00 - 17:00</li>
+            <li>🕒 Office Hours: 08:00 - 17:00</li>
         </ul>
     </aside>
 

@@ -62,8 +62,8 @@
             <main class="p-6 sm:p-8 transition-all duration-400" :class="{ 'blur-sm scale-[0.995]': showFolderPanel }">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                     @foreach ($folders as $folder)
-                        <div @click="openFolder('{{ addslashes($folder->name) }}', $event)"
-                            class="group relative p-6 bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+                        <div
+                            class="group relative p-6 bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
 
                             <!-- Gradient overlay on hover -->
                             <div
@@ -77,24 +77,40 @@
                             </span>
 
                             <div class="relative z-10">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div
-                                        class="p-4 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                                        <i class="fa-solid fa-folder-tree text-2xl text-white"></i>
-                                    </div>
-                                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <i class="fa-solid fa-arrow-right text-emerald-600 dark:text-emerald-400"></i>
-                                    </div>
+                                <!-- Action Buttons (Top Right) -->
+                                <div class="absolute top-0 right-0 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <button @click.stop="startRenameFolder('{{ addslashes($folder->name) }}')"
+                                        class="p-2 rounded-lg bg-blue-500/90 hover:bg-blue-600 text-white text-xs shadow-lg transform hover:scale-110 transition-all"
+                                        title="Rename">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button @click.stop="deleteFolder('{{ addslashes($folder->name) }}')"
+                                        class="p-2 rounded-lg bg-red-500/90 hover:bg-red-600 text-white text-xs shadow-lg transform hover:scale-110 transition-all"
+                                        title="Delete">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </div>
 
-                                <div>
-                                    <h3
-                                        class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                                        {{ $folder->name }}
-                                    </h3>
-                                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                                        <i class="fa-solid fa-clock"></i>
-                                        <span>{{ $folder->updated_at->diffForHumans() }}</span>
+                                <div @click="openFolder('{{ addslashes($folder->name) }}', $event)" class="cursor-pointer">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div
+                                            class="p-4 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                                            <i class="fa-solid fa-folder-tree text-2xl text-white"></i>
+                                        </div>
+                                        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <i class="fa-solid fa-arrow-right text-emerald-600 dark:text-emerald-400"></i>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3
+                                            class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                            {{ $folder->name }}
+                                        </h3>
+                                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                            <i class="fa-solid fa-clock"></i>
+                                            <span>{{ $folder->updated_at->diffForHumans() }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
