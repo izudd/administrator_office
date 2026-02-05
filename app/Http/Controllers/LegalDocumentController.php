@@ -15,7 +15,35 @@ class LegalDocumentController extends Controller
     public function index()
     {
         $folders = LegalDocument::orderBy('name')->get();
-        return view('legal-documents', compact('folders'));
+
+        // Calculate real stats
+        $totalFiles = Document::count();
+
+        // Recent files (last 7 days)
+        $recentFiles = Document::where('created_at', '>=', now()->subDays(7))->count();
+
+        // Calculate total storage used
+        $totalStorageBytes = 0;
+        $documents = Document::all();
+        foreach ($documents as $doc) {
+            $fullPath = storage_path('app/public/' . $doc->file_path);
+            if (file_exists($fullPath)) {
+                $totalStorageBytes += filesize($fullPath);
+            }
+        }
+
+        // Format storage size
+        if ($totalStorageBytes >= 1073741824) {
+            $totalStorage = number_format($totalStorageBytes / 1073741824, 2) . ' GB';
+        } elseif ($totalStorageBytes >= 1048576) {
+            $totalStorage = number_format($totalStorageBytes / 1048576, 2) . ' MB';
+        } elseif ($totalStorageBytes >= 1024) {
+            $totalStorage = number_format($totalStorageBytes / 1024, 2) . ' KB';
+        } else {
+            $totalStorage = $totalStorageBytes . ' B';
+        }
+
+        return view('legal-documents', compact('folders', 'totalFiles', 'recentFiles', 'totalStorage'));
     }
 
     public function store(Request $request)

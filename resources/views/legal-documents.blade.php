@@ -97,7 +97,7 @@
             <main class="relative z-10 p-6 sm:p-8 transition-all duration-400" :class="{ 'blur-sm scale-[0.995]': showFolderPanel }">
                 <!-- Stats Bar -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center">
                                 <i class="fa-solid fa-folder text-emerald-500"></i>
@@ -108,36 +108,36 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-300">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-lg bg-cyan-500/10 dark:bg-cyan-500/20 flex items-center justify-center">
                                 <i class="fa-solid fa-file-lines text-cyan-500"></i>
                             </div>
                             <div>
-                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">--</p>
+                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $totalFiles ?? 0 }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Total Files</p>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center">
                                 <i class="fa-solid fa-clock text-purple-500"></i>
                             </div>
                             <div>
-                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">--</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Recent</p>
+                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $recentFiles ?? 0 }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Recent (7 days)</p>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center">
                                 <i class="fa-solid fa-hard-drive text-amber-500"></i>
                             </div>
                             <div>
-                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">--</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Storage</p>
+                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $totalStorage ?? '0 B' }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Storage Used</p>
                             </div>
                         </div>
                     </div>
