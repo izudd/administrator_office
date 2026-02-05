@@ -309,32 +309,33 @@ class LegalDocumentController extends Controller
             'old_name' => 'required|string',
             'new_name' => 'required|string|max:255',
         ]);
-    
+
         $oldName = $request->old_name;
         $newName = $request->new_name;
-    
+
         try {
-            // Update database
-            $folder = Folder::where('name', $oldName)->firstOrFail();
+            // Update database - use LegalDocument model
+            $folder = LegalDocument::where('name', $oldName)->firstOrFail();
             $folder->name = $newName;
             $folder->save();
-    
+
             // Rename physical folder
             $oldPath = storage_path("app/public/legal-documents/{$oldName}");
             $newPath = storage_path("app/public/legal-documents/{$newName}");
-            
+
             if (File::exists($oldPath)) {
                 File::move($oldPath, $newPath);
             }
-    
+
             // Update file paths in documents table
             Document::where('folder_id', $folder->id)->get()->each(function ($doc) use ($oldName, $newName) {
                 $doc->file_path = str_replace("legal-documents/{$oldName}/", "legal-documents/{$newName}/", $doc->file_path);
                 $doc->save();
             });
-    
+
             return response()->json(['success' => true, 'message' => 'Folder renamed successfully']);
         } catch (\Exception $e) {
+            Log::error('Rename folder error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
@@ -344,27 +345,28 @@ class LegalDocumentController extends Controller
         $request->validate([
             'name' => 'required|string',
         ]);
-    
+
         $folderName = $request->name;
-    
+
         try {
-            // Delete from database
-            $folder = Folder::where('name', $folderName)->firstOrFail();
-            
+            // Delete from database - use LegalDocument model
+            $folder = LegalDocument::where('name', $folderName)->firstOrFail();
+
             // Delete all documents in this folder
             Document::where('folder_id', $folder->id)->delete();
-            
+
             // Delete folder record
             $folder->delete();
-    
+
             // Delete physical folder
             $folderPath = storage_path("app/public/legal-documents/{$folderName}");
             if (File::exists($folderPath)) {
                 File::deleteDirectory($folderPath);
             }
-    
+
             return response()->json(['success' => true, 'message' => 'Folder deleted successfully']);
         } catch (\Exception $e) {
+            Log::error('Delete folder error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
