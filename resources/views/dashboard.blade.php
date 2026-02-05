@@ -29,18 +29,20 @@
 
             <!-- Navigation -->
             <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700">
-                <p x-show="!sidebarCollapsed" class="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Main Menu</p>
+                <p x-show="!sidebarCollapsed" class="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Overview</p>
 
                 <a href="{{ route('dashboard') }}" class="group flex items-center px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 text-white font-medium transition-all duration-200">
                     <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-house text-white text-sm"></i>
+                        <i class="fa-solid fa-gauge-high text-white text-sm"></i>
                     </div>
                     <span x-show="!sidebarCollapsed" class="ml-3">Dashboard</span>
                 </a>
 
+                <p x-show="!sidebarCollapsed" class="px-4 py-2 mt-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Documents</p>
+
                 <a href="{{ route('legal-documents.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
                     <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-blue-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-blue-500/30 group-hover:scale-110">
-                        <i class="fa-solid fa-folder-open text-sm"></i>
+                        <i class="fa-solid fa-scale-balanced text-sm"></i>
                     </div>
                     <span x-show="!sidebarCollapsed" class="ml-3">Legal Documents</span>
                 </a>
@@ -53,7 +55,7 @@
                 </a>
 
                 <a href="#" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
-                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-orange-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-orange-500/30 group-hover:scale-110">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-amber-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-amber-500/30 group-hover:scale-110">
                         <i class="fa-solid fa-box-archive text-sm"></i>
                     </div>
                     <span x-show="!sidebarCollapsed" class="ml-3">Archive Records</span>
@@ -61,30 +63,30 @@
 
                 <a href="#" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
                     <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-indigo-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-indigo-500/30 group-hover:scale-110">
-                        <i class="fa-solid fa-chalkboard-user text-sm"></i>
+                        <i class="fa-solid fa-graduation-cap text-sm"></i>
                     </div>
                     <span x-show="!sidebarCollapsed" class="ml-3">Training Material</span>
                 </a>
 
-                <p x-show="!sidebarCollapsed" class="px-4 py-2 mt-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Reports</p>
+                <p x-show="!sidebarCollapsed" class="px-4 py-2 mt-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Management</p>
 
                 <a href="{{ route('inventory.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
                     <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-teal-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-teal-500/30 group-hover:scale-110">
-                        <i class="fa-solid fa-warehouse text-sm"></i>
+                        <i class="fa-solid fa-boxes-stacked text-sm"></i>
                     </div>
                     <span x-show="!sidebarCollapsed" class="ml-3">Inventory</span>
                 </a>
 
                 <a href="#" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
-                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-green-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-green-500/30 group-hover:scale-110">
-                        <i class="fa-solid fa-chart-line text-sm"></i>
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-emerald-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-emerald-500/30 group-hover:scale-110">
+                        <i class="fa-solid fa-chart-pie text-sm"></i>
                     </div>
                     <span x-show="!sidebarCollapsed" class="ml-3">Financial Reports</span>
                 </a>
 
                 <a href="#" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
                     <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-rose-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-rose-500/30 group-hover:scale-110">
-                        <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
+                        <i class="fa-solid fa-receipt text-sm"></i>
                     </div>
                     <span x-show="!sidebarCollapsed" class="ml-3">Finance & Tax</span>
                 </a>
@@ -144,45 +146,6 @@
 
                     <!-- Actions -->
                     <div class="flex items-center gap-3">
-                        <!-- Quick Actions Dropdown -->
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open"
-                                    class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white rounded-xl text-sm font-medium transition-all shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40">
-                                <i class="fa-solid fa-plus"></i>
-                                <span class="hidden sm:inline">Quick Actions</span>
-                                <i class="fa-solid fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
-                            </button>
-
-                            <div x-show="open" @click.away="open = false"
-                                 x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 scale-95"
-                                 x-transition:enter-end="opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-150"
-                                 x-transition:leave-start="opacity-100 scale-100"
-                                 x-transition:leave-end="opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 py-2 z-50">
-                                <a href="{{ route('legal-documents.index') }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all">
-                                    <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
-                                        <i class="fa-solid fa-folder-plus text-blue-600 dark:text-blue-400 text-sm"></i>
-                                    </div>
-                                    <span class="text-sm text-slate-700 dark:text-slate-200">New Folder</span>
-                                </a>
-                                <a href="{{ route('legal-documents.index') }}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all">
-                                    <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
-                                        <i class="fa-solid fa-file-arrow-up text-green-600 dark:text-green-400 text-sm"></i>
-                                    </div>
-                                    <span class="text-sm text-slate-700 dark:text-slate-200">Upload Document</span>
-                                </a>
-                                <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
-                                <a href="#" class="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all">
-                                    <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                                        <i class="fa-solid fa-gear text-slate-600 dark:text-slate-400 text-sm"></i>
-                                    </div>
-                                    <span class="text-sm text-slate-700 dark:text-slate-200">Settings</span>
-                                </a>
-                            </div>
-                        </div>
-
                         <!-- Notifications -->
                         <button class="relative p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
                             <i class="fa-solid fa-bell text-slate-600 dark:text-slate-300"></i>
@@ -206,39 +169,37 @@
                         $totalFolders = \App\Models\LegalDocument::count();
                         $totalDocuments = \App\Models\Document::count();
                         $recentUploads = \App\Models\Document::where('created_at', '>=', now()->subDays(7))->count();
-                        $storageUsed = 0;
+
+                        // Calculate storage
+                        $totalStorageBytes = 0;
+                        $documents = \App\Models\Document::all();
+                        foreach ($documents as $doc) {
+                            $fullPath = storage_path('app/public/' . $doc->file_path);
+                            if (file_exists($fullPath)) {
+                                $totalStorageBytes += filesize($fullPath);
+                            }
+                        }
+                        $storageUsed = $totalStorageBytes / 1048576; // Convert to MB
+
+                        // Inventory count
+                        $inventoryCount = \App\Models\InventoryAsset::where('is_deleted', false)->count();
                     } catch (\Exception $e) {
                         $totalFolders = 0;
                         $totalDocuments = 0;
                         $recentUploads = 0;
                         $storageUsed = 0;
+                        $inventoryCount = 0;
                     }
                 @endphp
 
+                <!-- Summary Stats -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
-                    <!-- Total Folders -->
-                    <div class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 lg:p-6 border border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-500/50 transition-all hover:shadow-xl hover:shadow-blue-500/10 overflow-hidden">
+                    <!-- Total Documents -->
+                    <div class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 lg:p-6 border border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-500/50 transition-all hover:shadow-xl overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div class="relative">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-folder text-white text-lg"></i>
-                                </div>
-                                <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-full">
-                                    <i class="fa-solid fa-arrow-up mr-1"></i>12%
-                                </span>
-                            </div>
-                            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ $totalFolders }}</div>
-                            <div class="text-sm text-slate-500 dark:text-slate-400">Total Folders</div>
-                        </div>
-                    </div>
-
-                    <!-- Total Documents -->
-                    <div class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 lg:p-6 border border-slate-200 dark:border-slate-800 hover:border-purple-300 dark:hover:border-purple-500/50 transition-all hover:shadow-xl hover:shadow-purple-500/10 overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div class="relative">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform">
                                     <i class="fa-solid fa-file-lines text-white text-lg"></i>
                                 </div>
                                 <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-full">
@@ -250,25 +211,42 @@
                         </div>
                     </div>
 
-                    <!-- Recent Uploads -->
-                    <div class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 lg:p-6 border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-500/50 transition-all hover:shadow-xl hover:shadow-emerald-500/10 overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <!-- Total Folders -->
+                    <div class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 lg:p-6 border border-slate-200 dark:border-slate-800 hover:border-purple-300 dark:hover:border-purple-500/50 transition-all hover:shadow-xl overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div class="relative">
                             <div class="flex items-center justify-between mb-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-clock-rotate-left text-white text-lg"></i>
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-folder text-white text-lg"></i>
                                 </div>
-                                <span class="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
-                                    This Week
+                                <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-full">
+                                    <i class="fa-solid fa-arrow-up mr-1"></i>12%
                                 </span>
                             </div>
-                            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ $recentUploads }}</div>
-                            <div class="text-sm text-slate-500 dark:text-slate-400">Recent Uploads</div>
+                            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ $totalFolders }}</div>
+                            <div class="text-sm text-slate-500 dark:text-slate-400">Total Folders</div>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Items -->
+                    <div class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 lg:p-6 border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-500/50 transition-all hover:shadow-xl overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="relative">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-teal-500/30 group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-boxes-stacked text-white text-lg"></i>
+                                </div>
+                                <span class="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
+                                    Assets
+                                </span>
+                            </div>
+                            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ $inventoryCount }}</div>
+                            <div class="text-sm text-slate-500 dark:text-slate-400">Inventory Items</div>
                         </div>
                     </div>
 
                     <!-- Storage Used -->
-                    <div class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 lg:p-6 border border-slate-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-orange-500/50 transition-all hover:shadow-xl hover:shadow-orange-500/10 overflow-hidden">
+                    <div class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 lg:p-6 border border-slate-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-orange-500/50 transition-all hover:shadow-xl overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div class="relative">
                             <div class="flex items-center justify-between mb-4">
@@ -285,193 +263,228 @@
                     </div>
                 </div>
 
-                <!-- Document Management Section -->
-                <div class="space-y-4 mb-8">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Document Management</h2>
-                        <a href="{{ route('legal-documents.index') }}" class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 font-medium">
-                            <span>View All</span>
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </a>
+                <!-- Modules Grid -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Quick Access</h2>
                     </div>
 
-                    <!-- Legal Documents Card -->
-                    <a href="{{ route('legal-documents.index') }}"
-                       class="group flex items-center justify-between bg-white dark:bg-slate-900 rounded-2xl p-5 lg:p-6 border-2 border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition-all hover:shadow-2xl hover:shadow-blue-500/10">
-                        <div class="flex items-center gap-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                        <!-- Legal Documents -->
+                        <a href="{{ route('legal-documents.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition-all hover:shadow-2xl hover:shadow-blue-500/10 overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
                             <div class="relative">
-                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-xl shadow-blue-500/30 group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-folder-open text-2xl text-white"></i>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-xl shadow-blue-500/30 group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-scale-balanced text-white text-xl"></i>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ $totalDocuments }}</span>
+                                        <p class="text-xs text-slate-500">files</p>
+                                    </div>
                                 </div>
-                                <span class="absolute -top-2 -right-2 px-2 py-0.5 bg-emerald-500 text-white text-xs font-bold rounded-full shadow-lg">Active</span>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                    Legal Documents
-                                </h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Contracts, agreements, and legal files</p>
-                                <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Legal Documents</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Contracts, agreements, and legal files</p>
+                                <div class="flex items-center gap-4 text-xs text-slate-500">
                                     <span class="flex items-center gap-1.5">
-                                        <i class="fa-solid fa-layer-group"></i>
+                                        <i class="fa-solid fa-folder"></i>
                                         {{ $totalFolders }} folders
                                     </span>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Partner Docs -->
+                        <a href="#" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-purple-400 dark:hover:border-purple-500 transition-all hover:shadow-2xl hover:shadow-purple-500/10 overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-xl shadow-purple-500/30 group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-handshake text-white text-xl"></i>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">12</span>
+                                        <p class="text-xs text-slate-500">partners</p>
+                                    </div>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Partner Docs</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Partnership agreements and contracts</p>
+                                <div class="flex items-center gap-4 text-xs text-slate-500">
                                     <span class="flex items-center gap-1.5">
                                         <i class="fa-solid fa-file"></i>
-                                        {{ $totalDocuments }} files
+                                        48 documents
                                     </span>
                                 </div>
                             </div>
-                        </div>
-                        <div class="flex items-center gap-6">
-                            <div class="text-right hidden md:block">
-                                <div class="text-2xl font-bold text-slate-900 dark:text-white">{{ $totalDocuments }}</div>
-                                <div class="text-xs text-slate-500 dark:text-slate-400">total files</div>
-                            </div>
-                            <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all">
-                                <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-white group-hover:translate-x-1 transition-all"></i>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Other Modules Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Partner Documents -->
-                        <a href="#" class="group flex items-center justify-between bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 hover:border-purple-300 dark:hover:border-purple-500/50 transition-all hover:shadow-lg">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-handshake text-white"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Partner Docs</h3>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">12 partners</p>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-600 group-hover:text-purple-500 group-hover:translate-x-1 transition-all"></i>
                         </a>
 
                         <!-- Archive Records -->
-                        <a href="#" class="group flex items-center justify-between bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-orange-500/50 transition-all hover:shadow-lg">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-box-archive text-white"></i>
+                        <a href="#" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 transition-all hover:shadow-2xl hover:shadow-amber-500/10 overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/30 group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-box-archive text-white text-xl"></i>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">256</span>
+                                        <p class="text-xs text-slate-500">records</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">Archive Records</h3>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">256 records</p>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Archive Records</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Historical documents and archives</p>
+                                <div class="flex items-center gap-4 text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                        Since 2016
+                                    </span>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-600 group-hover:text-orange-500 group-hover:translate-x-1 transition-all"></i>
                         </a>
 
                         <!-- Training Material -->
-                        <a href="#" class="group flex items-center justify-between bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all hover:shadow-lg">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-chalkboard-user text-white"></i>
+                        <a href="#" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all hover:shadow-2xl hover:shadow-indigo-500/10 overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-violet-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-xl shadow-indigo-500/30 group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">45</span>
+                                        <p class="text-xs text-slate-500">materials</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Training Material</h3>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">45 materials</p>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Training Material</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Learning resources and guides</p>
+                                <div class="flex items-center gap-4 text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="fa-solid fa-video"></i>
+                                        12 videos
+                                    </span>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all"></i>
                         </a>
 
                         <!-- Inventory -->
-                        @php
-                            try {
-                                $inventoryCount = \App\Models\InventoryAsset::where('is_deleted', false)->count();
-                            } catch (\Exception $e) {
-                                $inventoryCount = 0;
-                            }
-                        @endphp
-                        <a href="{{ route('inventory.index') }}" class="group flex items-center justify-between bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-500/50 transition-all hover:shadow-lg">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-teal-500/30 group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-warehouse text-white"></i>
+                        <a href="{{ route('inventory.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-teal-400 dark:hover:border-teal-500 transition-all hover:shadow-2xl hover:shadow-teal-500/10 overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center shadow-xl shadow-teal-500/30 group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-boxes-stacked text-white text-xl"></i>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ $inventoryCount }}</span>
+                                        <p class="text-xs text-slate-500">items</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">Inventory</h3>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ $inventoryCount }} items</p>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">Inventory</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Asset management and tracking</p>
+                                <div class="flex items-center gap-4 text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="fa-solid fa-chart-line"></i>
+                                        Real-time tracking
+                                    </span>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-600 group-hover:text-teal-500 group-hover:translate-x-1 transition-all"></i>
                         </a>
 
                         <!-- Financial Reports -->
-                        <a href="#" class="group flex items-center justify-between bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 hover:border-green-300 dark:hover:border-green-500/50 transition-all hover:shadow-lg">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-chart-line text-white"></i>
+                        <a href="#" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-500 transition-all hover:shadow-2xl hover:shadow-emerald-500/10 overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-xl shadow-emerald-500/30 group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-chart-pie text-white text-xl"></i>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">34</span>
+                                        <p class="text-xs text-slate-500">reports</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">Financial Reports</h3>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">34 reports</p>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-600 group-hover:text-green-500 group-hover:translate-x-1 transition-all"></i>
-                        </a>
-
-                        <!-- Finance & Tax -->
-                        <a href="#" class="group flex items-center justify-between bg-gradient-to-r from-rose-500 to-pink-500 rounded-xl p-5 text-white hover:shadow-2xl hover:shadow-rose-500/30 transition-all">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-file-invoice-dollar text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold">Finance & Tax</h3>
-                                    <p class="text-sm text-rose-100">67 reports</p>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Financial Reports</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Financial statements and analysis</p>
+                                <div class="flex items-center gap-4 text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="fa-solid fa-calendar"></i>
+                                        Q4 2025
+                                    </span>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-arrow-right text-lg group-hover:translate-x-1 transition-transform"></i>
                         </a>
                     </div>
                 </div>
 
-                <!-- Recent Activity -->
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <i class="fa-solid fa-clock-rotate-left text-emerald-500"></i>
-                            Recent Activity
-                        </h3>
-                        <a href="#" class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline font-medium">View All</a>
-                    </div>
-
-                    @php
-                        try {
-                            $recentDocs = \App\Models\Document::with('folder')->latest()->take(5)->get();
-                        } catch (\Exception $e) {
-                            $recentDocs = collect();
-                        }
-                    @endphp
-
-                    <div class="space-y-3">
-                        @forelse($recentDocs as $doc)
-                        <div class="group flex items-center justify-between p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
-                            <div class="flex items-center gap-4">
-                                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-500/20 dark:to-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-file-{{ strtolower($doc->file_type ?? '') == 'pdf' ? 'pdf text-red-500' : 'lines text-blue-500' }}"></i>
+                <!-- Bottom Row: Finance & Tax + Recent Activity -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Finance & Tax Card -->
+                    <a href="#" class="group relative bg-gradient-to-br from-rose-500 via-pink-500 to-rose-600 rounded-2xl p-6 text-white hover:shadow-2xl hover:shadow-rose-500/30 transition-all overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOGMxLjI1NCAwIDIuNDgtLjEyOCAzLjY2Mi0uMzcxIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9nPjwvc3ZnPg==')] opacity-30"></div>
+                        <div class="relative">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-receipt text-2xl"></i>
                                 </div>
-                                <div>
-                                    <p class="text-sm font-medium text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{ $doc->file_name }}</p>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">
-                                        {{ $doc->folder->name ?? 'Unknown' }} • {{ $doc->created_at->diffForHumans() }}
-                                    </p>
+                                <div class="text-right">
+                                    <span class="text-3xl font-bold">67</span>
+                                    <p class="text-xs text-rose-200">reports</p>
                                 </div>
                             </div>
-                            <span class="px-2.5 py-1 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-lg uppercase">
-                                {{ strtoupper($doc->file_type ?? 'FILE') }}
-                            </span>
-                        </div>
-                        @empty
-                        <div class="text-center py-12">
-                            <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
-                                <i class="fa-solid fa-inbox text-3xl text-slate-300 dark:text-slate-600"></i>
+                            <h3 class="text-xl font-bold mb-2">Finance & Tax</h3>
+                            <p class="text-sm text-rose-100 mb-4">Tax documents, invoices, and financial records</p>
+                            <div class="flex items-center gap-2 text-sm">
+                                <span class="px-3 py-1 bg-white/20 rounded-full">2025 Filings</span>
+                                <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
                             </div>
-                            <p class="text-sm text-slate-500 dark:text-slate-400">No recent activity</p>
                         </div>
-                        @endforelse
+                    </a>
+
+                    <!-- Recent Activity -->
+                    <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left text-emerald-500"></i>
+                                Recent Activity
+                            </h3>
+                            <a href="{{ route('legal-documents.index') }}" class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline font-medium">View All</a>
+                        </div>
+
+                        @php
+                            try {
+                                $recentDocs = \App\Models\Document::with('folder')->latest()->take(4)->get();
+                            } catch (\Exception $e) {
+                                $recentDocs = collect();
+                            }
+                        @endphp
+
+                        <div class="space-y-3">
+                            @forelse($recentDocs as $doc)
+                            <div class="group flex items-center justify-between p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-500/20 dark:to-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-file-{{ strtolower($doc->file_type ?? '') == 'pdf' ? 'pdf text-red-500' : 'lines text-blue-500' }}"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-slate-900 dark:text-white truncate max-w-[200px]">{{ $doc->file_name }}</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                                            {{ $doc->folder->name ?? 'Unknown' }} • {{ $doc->created_at->diffForHumans() }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-lg uppercase">
+                                    {{ strtoupper($doc->file_type ?? 'FILE') }}
+                                </span>
+                            </div>
+                            @empty
+                            <div class="text-center py-8">
+                                <div class="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3">
+                                    <i class="fa-solid fa-inbox text-2xl text-slate-300 dark:text-slate-600"></i>
+                                </div>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">No recent activity</p>
+                            </div>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
 
@@ -519,12 +532,16 @@
 
             <nav class="px-3 py-6 space-y-1">
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 text-white font-medium">
-                    <i class="fa-solid fa-house w-5"></i>
+                    <i class="fa-solid fa-gauge-high w-5"></i>
                     <span>Dashboard</span>
                 </a>
                 <a href="{{ route('legal-documents.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
-                    <i class="fa-solid fa-folder-open w-5"></i>
+                    <i class="fa-solid fa-scale-balanced w-5"></i>
                     <span>Legal Documents</span>
+                </a>
+                <a href="{{ route('inventory.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-boxes-stacked w-5"></i>
+                    <span>Inventory</span>
                 </a>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
                     <i class="fa-solid fa-handshake w-5"></i>
