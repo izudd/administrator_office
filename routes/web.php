@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LegalDocumentController;
+use App\Http\Controllers\InventoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,6 +68,18 @@ Route::middleware(['auth'])->group(function () {
     
     Route::delete('/legal-documents/{legalDocument}', [LegalDocumentController::class, 'destroy'])
         ->name('legal-documents.destroy');
+
+    // Inventory Routes
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::get('/inventory/register', [InventoryController::class, 'register'])->name('inventory.register');
+    Route::get('/inventory/audit-trail', [InventoryController::class, 'auditTrail'])->name('inventory.audit-trail');
+    Route::get('/inventory/assets', [InventoryController::class, 'getAssets'])->name('inventory.assets');
+    Route::get('/inventory/{id}', [InventoryController::class, 'getAsset'])->name('inventory.show');
+    Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
+    Route::put('/inventory/{id}', [InventoryController::class, 'update'])->name('inventory.update');
+    Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+    Route::post('/inventory/{id}/loan', [InventoryController::class, 'loan'])->name('inventory.loan');
+    Route::post('/inventory/{id}/return', [InventoryController::class, 'returnAsset'])->name('inventory.return');
 });
 
 

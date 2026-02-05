@@ -68,7 +68,7 @@
 
                 <p x-show="!sidebarCollapsed" class="px-4 py-2 mt-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Reports</p>
 
-                <a href="#" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                <a href="{{ route('inventory.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
                     <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-teal-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-teal-500/30 group-hover:scale-110">
                         <i class="fa-solid fa-warehouse text-sm"></i>
                     </div>
@@ -378,14 +378,21 @@
                         </a>
 
                         <!-- Inventory -->
-                        <a href="#" class="group flex items-center justify-between bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-500/50 transition-all hover:shadow-lg">
+                        @php
+                            try {
+                                $inventoryCount = \App\Models\InventoryAsset::where('is_deleted', false)->count();
+                            } catch (\Exception $e) {
+                                $inventoryCount = 0;
+                            }
+                        @endphp
+                        <a href="{{ route('inventory.index') }}" class="group flex items-center justify-between bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-500/50 transition-all hover:shadow-lg">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-teal-500/30 group-hover:scale-110 transition-transform">
                                     <i class="fa-solid fa-warehouse text-white"></i>
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">Inventory</h3>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">178 items</p>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ $inventoryCount }} items</p>
                                 </div>
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-600 group-hover:text-teal-500 group-hover:translate-x-1 transition-all"></i>
