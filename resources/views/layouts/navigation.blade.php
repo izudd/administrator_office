@@ -15,8 +15,8 @@
                     <!-- Logo -->
                     <div class="relative">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 p-0.5 shadow-lg group-hover:shadow-emerald-500/30 transition-all duration-300 group-hover:scale-105">
-                            <div class="w-full h-full rounded-[10px] bg-white dark:bg-gray-900 flex items-center justify-center">
-                                <span class="text-sm font-bold bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">KAP</span>
+                            <div class="w-full h-full rounded-[10px] bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden">
+                                <img src="{{ asset('images/logo.PNG') }}" alt="KAP Logo" class="w-7 h-7 object-contain">
                             </div>
                         </div>
                         <!-- Pulse dot -->

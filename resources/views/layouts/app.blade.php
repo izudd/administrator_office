@@ -12,6 +12,11 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.PNG') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -265,24 +270,21 @@
                 <!-- Logo Container -->
                 <div class="relative animate-float">
                     <!-- Outer Glow -->
-                    <div class="absolute -inset-2 bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 rounded-3xl blur-xl opacity-40 animate-gradient"></div>
+                    <div class="absolute -inset-4 bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 rounded-3xl blur-2xl opacity-50 animate-gradient"></div>
 
                     <!-- Logo Box -->
-                    <div class="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 p-[2px] shadow-2xl">
-                        <div class="w-full h-full rounded-[14px] flex items-center justify-center overflow-hidden"
+                    <div class="relative w-28 h-28 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 p-[3px] shadow-2xl">
+                        <div class="w-full h-full rounded-[13px] flex items-center justify-center overflow-hidden"
                             :class="darkMode ? 'bg-gray-900' : 'bg-white'">
-                            @if(config('app.loading_logo'))
-                                <img src="{{ config('app.loading_logo') }}" alt="Logo" class="w-16 h-16 object-contain">
-                            @else
-                                <span class="text-3xl font-black bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">KAP</span>
-                            @endif
+                            <!-- Company Logo -->
+                            <img src="{{ asset('images/logo.PNG') }}" alt="KAP Budiandru Logo" class="w-20 h-20 object-contain">
                         </div>
                     </div>
 
                     <!-- Status Dot -->
-                    <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-3 flex items-center justify-center"
+                    <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-4 flex items-center justify-center shadow-lg"
                         :class="darkMode ? 'border-gray-900' : 'border-white'">
-                        <div class="w-2 h-2 bg-white rounded-full status-dot"></div>
+                        <div class="w-2.5 h-2.5 bg-white rounded-full status-dot"></div>
                     </div>
                 </div>
             </div>

@@ -643,14 +643,30 @@
             </div>
 
             <!-- Footer -->
-            <footer class="relative z-10 text-center py-8 border-t border-gray-200/50 dark:border-gray-700/50 mt-12 bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm">
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
-                    <span class="text-gray-500 dark:text-gray-400">© {{ date('Y') }}</span>
-                    <span class="font-bold bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
-                        KAP Budiandru & Rekan
-                    </span>
-                    <span class="text-gray-400 dark:text-gray-500 hidden sm:inline">•</span>
-                    <span class="text-sm text-gray-400 dark:text-gray-500">All rights reserved</span>
+            <footer class="relative z-10 py-8 border-t border-gray-200/50 dark:border-gray-700/50 mt-12 bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <!-- Logo -->
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 p-[2px] shadow-lg">
+                                <div class="w-full h-full rounded-[10px] bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden">
+                                    <img src="{{ asset('images/logo.PNG') }}" alt="KAP Logo" class="w-7 h-7 object-contain">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-sm bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
+                                    KAP Budiandru & Rekan
+                                </span>
+                                <span class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                                    Public Accountant Firm
+                                </span>
+                            </div>
+                        </div>
+                        <span class="text-gray-300 dark:text-gray-600 hidden sm:inline">|</span>
+                        <span class="text-xs text-gray-400 dark:text-gray-500">
+                            © {{ date('Y') }} All rights reserved
+                        </span>
+                    </div>
                 </div>
             </footer>
         </div>
