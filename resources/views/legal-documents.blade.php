@@ -1,7 +1,26 @@
 <x-app-layout>
+    <style>
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(20px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(30px, 10px) scale(1.05); }
+        }
+        .animate-blob { animation: blob 15s ease-in-out infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+    </style>
+
     <div style="--header-height:72px">
         <div x-data="legalDocsApp()" x-init="init()"
-            class="relative min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-emerald-950 transition-colors duration-500">
+            class="relative min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-[#0a0f1a] dark:via-[#0e1525] dark:to-[#111827] transition-colors duration-500">
+
+            <!-- Animated Background Blobs -->
+            <div class="fixed inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute -top-40 -right-40 w-80 h-80 bg-emerald-300/30 dark:bg-emerald-500/10 rounded-full blur-3xl animate-blob"></div>
+                <div class="absolute top-1/2 -left-40 w-96 h-96 bg-cyan-300/30 dark:bg-cyan-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+                <div class="absolute -bottom-40 right-1/3 w-80 h-80 bg-teal-300/30 dark:bg-teal-500/10 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+            </div>
 
             <!-- Toast Notification -->
             <div x-show="toast.show" x-transition:enter="transition ease-out duration-300"
@@ -39,53 +58,122 @@
             </div>
 
             <!-- Header area -->
-            <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 sm:p-8">
+            <header class="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 sm:p-8">
                 <div>
-                    <h1
-                        class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">
-                        📁 Legal Documents
-                    </h1>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Manage and organize your legal folders
-                        securely.</p>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                            <i class="fa-solid fa-folder-tree text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 dark:from-emerald-400 dark:via-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">
+                                Legal Documents
+                            </h1>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Manage and organize your legal folders securely
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mt-4 sm:mt-0">
+                <div class="mt-4 sm:mt-0 flex items-center gap-3">
+                    <!-- Search Bar -->
+                    <div class="relative hidden sm:block">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" placeholder="Search folders..."
+                            class="pl-9 pr-4 py-2.5 w-48 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-sm text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all" />
+                    </div>
+
+                    <!-- New Folder Button -->
                     <button @click="showAddModal = true"
-                        class="group relative inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                        class="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-emerald-500/30 transform hover:scale-105 transition-all duration-300">
                         <i class="fa-solid fa-plus group-hover:rotate-90 transition-transform duration-300"></i>
                         <span>New Folder</span>
+                        <div class="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </button>
                 </div>
             </header>
 
             <!-- Grid -->
-            <main class="p-6 sm:p-8 transition-all duration-400" :class="{ 'blur-sm scale-[0.995]': showFolderPanel }">
+            <main class="relative z-10 p-6 sm:p-8 transition-all duration-400" :class="{ 'blur-sm scale-[0.995]': showFolderPanel }">
+                <!-- Stats Bar -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center">
+                                <i class="fa-solid fa-folder text-emerald-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ count($folders) }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Total Folders</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-cyan-500/10 dark:bg-cyan-500/20 flex items-center justify-center">
+                                <i class="fa-solid fa-file-lines text-cyan-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">--</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Total Files</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center">
+                                <i class="fa-solid fa-clock text-purple-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">--</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Recent</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center">
+                                <i class="fa-solid fa-hard-drive text-amber-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">--</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Storage</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Folders Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                    @foreach ($folders as $folder)
+                    @foreach ($folders as $index => $folder)
                         <div
-                            class="group relative p-6 bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+                            style="animation-delay: {{ $index * 50 }}ms"
+                            class="group relative p-6 bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-md hover:shadow-2xl hover:shadow-emerald-500/10 dark:hover:shadow-emerald-500/5 transition-all duration-300 transform hover:-translate-y-2 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden animate-[fadeIn_0.5s_ease-out_forwards] opacity-0"
+                            >
 
                             <!-- Gradient overlay on hover -->
-                            <div
-                                class="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/10 group-hover:to-teal-500/10 transition-all duration-300 rounded-2xl">
+                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-teal-500/0 to-cyan-500/0 group-hover:from-emerald-500/5 group-hover:via-teal-500/10 group-hover:to-cyan-500/5 transition-all duration-500 rounded-2xl"></div>
+
+                            <!-- Shine effect -->
+                            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                             </div>
 
                             <!-- ripple placeholder -->
                             <span class="absolute inset-0 overflow-hidden rounded-2xl">
-                                <span
-                                    class="ripple absolute w-0 h-0 bg-emerald-400/30 rounded-full transform scale-0 opacity-0 pointer-events-none"></span>
+                                <span class="ripple absolute w-0 h-0 bg-emerald-400/30 rounded-full transform scale-0 opacity-0 pointer-events-none"></span>
                             </span>
 
                             <div class="relative z-10">
                                 <!-- Action Buttons (Top Right) -->
-                                <div class="absolute top-0 right-0 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <div class="absolute top-0 right-0 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-2 group-hover:translate-y-0">
                                     <button @click.stop="startRenameFolder('{{ addslashes($folder->name) }}')"
-                                        class="p-2 rounded-lg bg-blue-500/90 hover:bg-blue-600 text-white text-xs shadow-lg transform hover:scale-110 transition-all"
+                                        class="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs shadow-lg transform hover:scale-110 transition-all"
                                         title="Rename">
                                         <i class="fa-solid fa-pen"></i>
                                     </button>
                                     <button @click.stop="deleteFolder('{{ addslashes($folder->name) }}')"
-                                        class="p-2 rounded-lg bg-red-500/90 hover:bg-red-600 text-white text-xs shadow-lg transform hover:scale-110 transition-all"
+                                        class="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs shadow-lg transform hover:scale-110 transition-all"
                                         title="Delete">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
@@ -93,23 +181,30 @@
 
                                 <div @click="openFolder('{{ addslashes($folder->name) }}', $event)" class="cursor-pointer">
                                     <div class="flex items-center justify-between mb-4">
-                                        <div
-                                            class="p-4 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                                            <i class="fa-solid fa-folder-tree text-2xl text-white"></i>
+                                        <div class="relative">
+                                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl blur-lg opacity-50 group-hover:opacity-80 transition-opacity"></div>
+                                            <div class="relative p-4 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                                                <i class="fa-solid fa-folder text-2xl text-white"></i>
+                                            </div>
                                         </div>
-                                        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+                                            <span class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Open</span>
                                             <i class="fa-solid fa-arrow-right text-emerald-600 dark:text-emerald-400"></i>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <h3
-                                            class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
                                             {{ $folder->name }}
                                         </h3>
-                                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                                            <i class="fa-solid fa-clock"></i>
-                                            <span>{{ $folder->updated_at->diffForHumans() }}</span>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                                <i class="fa-solid fa-clock"></i>
+                                                <span>{{ $folder->updated_at->diffForHumans() }}</span>
+                                            </div>
+                                            <span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                                                Active
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -118,18 +213,27 @@
                     @endforeach
                 </div>
 
+                <style>
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(20px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                </style>
+
                 @if (count($folders) === 0)
                     <div class="text-center py-20">
-                        <div
-                            class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-800 mb-6">
-                            <i class="fa-solid fa-folder-open text-4xl text-gray-400"></i>
+                        <div class="relative inline-block mb-6">
+                            <div class="absolute inset-0 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full blur-xl opacity-30 animate-pulse"></div>
+                            <div class="relative w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+                                <i class="fa-solid fa-folder-open text-4xl text-gray-400 dark:text-gray-500"></i>
+                            </div>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">No folders yet</h3>
-                        <p class="text-gray-500 dark:text-gray-400 mb-6">Create your first folder to get started</p>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">No folders yet</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">Create your first folder to start organizing your legal documents securely</p>
                         <button @click="showAddModal = true"
-                            class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg">
-                            <i class="fa-solid fa-plus"></i>
-                            <span>Create Folder</span>
+                            class="group inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white font-semibold shadow-lg hover:shadow-xl hover:shadow-emerald-500/30 transform hover:scale-105 transition-all duration-300">
+                            <i class="fa-solid fa-plus group-hover:rotate-90 transition-transform duration-300"></i>
+                            <span>Create Your First Folder</span>
                         </button>
                     </div>
                 @endif
@@ -384,14 +488,14 @@
             </div>
 
             <!-- footer -->
-            <footer
-                class="text-center text-gray-500 dark:text-gray-400 py-8 border-t border-gray-200 dark:border-gray-700 mt-12">
-                <div class="flex items-center justify-center gap-2">
-                    <span>© {{ date('Y') }}</span>
-                    <span
-                        class="font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+            <footer class="relative z-10 text-center py-8 border-t border-gray-200/50 dark:border-gray-700/50 mt-12 bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm">
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
+                    <span class="text-gray-500 dark:text-gray-400">© {{ date('Y') }}</span>
+                    <span class="font-semibold bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
                         KAP Budiandru & Rekan
                     </span>
+                    <span class="text-gray-400 dark:text-gray-500 hidden sm:inline">•</span>
+                    <span class="text-sm text-gray-400 dark:text-gray-500">All rights reserved</span>
                 </div>
             </footer>
         </div>
