@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\PartnerDocumentController;
+use App\Http\Controllers\EmployeeLegalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -113,6 +114,14 @@ Route::middleware(['auth'])->group(function () {
     // Wildcard routes LAST (to avoid conflicts)
     Route::get('/partner-documents/{categoryId}/documents', [PartnerDocumentController::class, 'getDocuments'])->name('partner-documents.documents');
     Route::post('/partner-documents/{categoryId}/upload', [PartnerDocumentController::class, 'uploadDocument'])->name('partner-documents.upload');
+
+    // Employee Legal (Kontrak Karyawan) Routes
+    Route::get('/employee-legal', [EmployeeLegalController::class, 'index'])->name('employee-legal.index');
+    Route::post('/employee-legal', [EmployeeLegalController::class, 'store'])->name('employee-legal.store');
+    Route::get('/employee-legal/contracts', [EmployeeLegalController::class, 'getContracts'])->name('employee-legal.contracts');
+    Route::get('/employee-legal/{id}', [EmployeeLegalController::class, 'show'])->name('employee-legal.show');
+    Route::put('/employee-legal/{id}', [EmployeeLegalController::class, 'update'])->name('employee-legal.update');
+    Route::delete('/employee-legal/{id}', [EmployeeLegalController::class, 'destroy'])->name('employee-legal.destroy');
 });
 
 
