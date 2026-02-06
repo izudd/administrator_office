@@ -6,6 +6,7 @@ use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\PartnerDocumentController;
 use App\Http\Controllers\EmployeeLegalController;
+use App\Http\Controllers\EmployeeDocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -122,6 +123,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/employee-legal/{id}', [EmployeeLegalController::class, 'show'])->name('employee-legal.show');
     Route::put('/employee-legal/{id}', [EmployeeLegalController::class, 'update'])->name('employee-legal.update');
     Route::delete('/employee-legal/{id}', [EmployeeLegalController::class, 'destroy'])->name('employee-legal.destroy');
+
+    // Employee Documents (Legal Karyawan) Routes
+    Route::get('/employee-documents', [EmployeeDocumentController::class, 'index'])->name('employee-documents.index');
+    Route::post('/employee-documents/employees', [EmployeeDocumentController::class, 'storeEmployee'])->name('employee-documents.employees.store');
+    Route::put('/employee-documents/employees/{id}', [EmployeeDocumentController::class, 'updateEmployee'])->name('employee-documents.employees.update');
+    Route::delete('/employee-documents/employees/{id}', [EmployeeDocumentController::class, 'destroyEmployee'])->name('employee-documents.employees.destroy');
+    Route::get('/employee-documents/{employeeId}/files', [EmployeeDocumentController::class, 'getFiles'])->name('employee-documents.files');
+    Route::post('/employee-documents/{employeeId}/upload', [EmployeeDocumentController::class, 'uploadFile'])->name('employee-documents.upload');
+    Route::delete('/employee-documents/files/{fileId}', [EmployeeDocumentController::class, 'deleteFile'])->name('employee-documents.files.delete');
+    Route::get('/employee-documents/preview/{fileId}', [EmployeeDocumentController::class, 'previewFile'])->name('employee-documents.preview');
 });
 
 

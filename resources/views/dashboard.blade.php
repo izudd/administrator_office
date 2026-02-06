@@ -49,7 +49,14 @@
 
                 <a href="{{ route('employee-legal.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
                     <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-cyan-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-cyan-500/30 group-hover:scale-110">
-                        <i class="fa-solid fa-user-tie text-sm"></i>
+                        <i class="fa-solid fa-file-signature text-sm"></i>
+                    </div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Kontrak Karyawan</span>
+                </a>
+
+                <a href="{{ route('employee-documents.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-sky-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-sky-500/30 group-hover:scale-110">
+                        <i class="fa-solid fa-user-shield text-sm"></i>
                     </div>
                     <span x-show="!sidebarCollapsed" class="ml-3">Legal Karyawan</span>
                 </a>
@@ -193,6 +200,9 @@
 
                         // Employee contracts count
                         $employeeContractCount = \App\Models\EmployeeContract::count();
+
+                        // Employee documents count (unique employees)
+                        $employeeDocCount = \App\Models\EmployeeProfile::count();
                     } catch (\Exception $e) {
                         $totalFolders = 0;
                         $totalDocuments = 0;
@@ -200,6 +210,7 @@
                         $storageUsed = 0;
                         $inventoryCount = 0;
                         $employeeContractCount = 0;
+                        $employeeDocCount = 0;
                     }
                 @endphp
 
@@ -305,25 +316,49 @@
                             </div>
                         </a>
 
-                        <!-- Legal Karyawan -->
+                        <!-- Kontrak Karyawan -->
                         <a href="{{ route('employee-legal.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-cyan-400 dark:hover:border-cyan-500 transition-all hover:shadow-2xl hover:shadow-cyan-500/10 overflow-hidden">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
                             <div class="relative">
                                 <div class="flex items-center justify-between mb-4">
                                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-xl shadow-cyan-500/30 group-hover:scale-110 transition-transform">
-                                        <i class="fa-solid fa-user-tie text-white text-xl"></i>
+                                        <i class="fa-solid fa-file-signature text-white text-xl"></i>
                                     </div>
                                     <div class="text-right">
                                         <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ $employeeContractCount }}</span>
                                         <p class="text-xs text-slate-500">contracts</p>
                                     </div>
                                 </div>
-                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Legal Karyawan</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Employee contracts & agreements</p>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Kontrak Karyawan</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">PKWT & PKWTT contract management</p>
                                 <div class="flex items-center gap-4 text-xs text-slate-500">
                                     <span class="flex items-center gap-1.5">
                                         <i class="fa-solid fa-file-contract"></i>
                                         PKWT & PKWTT
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Legal Karyawan -->
+                        <a href="{{ route('employee-documents.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-sky-400 dark:hover:border-sky-500 transition-all hover:shadow-2xl hover:shadow-sky-500/10 overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-sky-500/10 to-blue-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-xl shadow-sky-500/30 group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-user-shield text-white text-xl"></i>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ $employeeDocCount ?? 0 }}</span>
+                                        <p class="text-xs text-slate-500">employees</p>
+                                    </div>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Legal Karyawan</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Berkas legal & dokumen karyawan</p>
+                                <div class="flex items-center gap-4 text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="fa-solid fa-id-card"></i>
+                                        KTP, NPWP, BPJS
                                     </span>
                                 </div>
                             </div>
@@ -575,7 +610,11 @@
                     <span>Legal Documents</span>
                 </a>
                 <a href="{{ route('employee-legal.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
-                    <i class="fa-solid fa-user-tie w-5"></i>
+                    <i class="fa-solid fa-file-signature w-5"></i>
+                    <span>Kontrak Karyawan</span>
+                </a>
+                <a href="{{ route('employee-documents.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-user-shield w-5"></i>
                     <span>Legal Karyawan</span>
                 </a>
                 <a href="{{ route('inventory.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">

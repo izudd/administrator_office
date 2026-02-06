@@ -40,7 +40,13 @@
                 </a>
                 <a href="{{ route('employee-legal.index') }}" class="group flex items-center px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 text-white font-medium transition-all duration-200">
                     <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-user-tie text-sm text-white"></i>
+                        <i class="fa-solid fa-file-signature text-sm text-white"></i>
+                    </div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Kontrak Karyawan</span>
+                </a>
+                <a href="{{ route('employee-documents.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-sky-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-sky-500/30 group-hover:scale-110">
+                        <i class="fa-solid fa-user-shield text-sm"></i>
                     </div>
                     <span x-show="!sidebarCollapsed" class="ml-3">Legal Karyawan</span>
                 </a>
@@ -95,7 +101,7 @@
             <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
                 <div class="flex items-center justify-between px-4 lg:px-8 py-4">
                     <div class="hidden sm:block">
-                        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Legal Karyawan</h1>
+                        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Kontrak Karyawan</h1>
                         <p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
                             <i class="fa-solid fa-file-contract"></i>
                             Sistem Manajemen Kontrak Karyawan
@@ -635,7 +641,7 @@
 
                 <!-- Footer -->
                 <footer class="mt-12 text-center text-slate-400 dark:text-slate-500 text-sm pb-4">
-                    &copy; {{ date('Y') }} <span class="font-medium text-slate-600 dark:text-slate-400">KAP Budiandru & Rekan</span> — Legal Karyawan
+                    &copy; {{ date('Y') }} <span class="font-medium text-slate-600 dark:text-slate-400">KAP Budiandru & Rekan</span> — Kontrak Karyawan
                 </footer>
             </div>
         </main>
