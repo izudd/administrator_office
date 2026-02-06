@@ -149,7 +149,7 @@
             </nav>
 
             <!-- Stats -->
-            <section x-show="activeTab === 'documents'" class="relative z-10 px-6 sm:px-8 pb-6"
+            <section x-show="activeTab === 'documents'" class="relative z-10 px-6 sm:px-8 pb-6">
                 <div class="max-w-7xl mx-auto">
                     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
                         <div class="glass-card rounded-2xl p-5 hover:shadow-lg transition-all group">
