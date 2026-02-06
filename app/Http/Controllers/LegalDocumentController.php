@@ -64,25 +64,20 @@ class LegalDocumentController extends Controller
 
     public function getDocuments($folder)
     {
-        // ✅ Log untuk debug
-        Log::info('getDocuments called', [
-            'folder' => $folder,
-            'decoded' => urldecode($folder),
-            'user' => auth()->check() ? auth()->user()->email : 'not authenticated'
-        ]);
-
         try {
             $decodedFolder = urldecode($folder);
 
-            // Cari folder di database
-            $folderModel = LegalDocument::where('name', $decodedFolder)->first();
+            // Cari folder di folders table (yang di-reference oleh documents.folder_id)
+            $folderModel = Folder::where('name', $decodedFolder)->first();
 
             if (!$folderModel) {
-                Log::warning('Folder not found', [
-                    'looking_for' => $decodedFolder,
-                    'available' => LegalDocument::pluck('name')->toArray()
-                ]);
-                return response()->json([]);
+                // Fallback: cek di legal_documents table
+                $legalDoc = LegalDocument::where('name', $decodedFolder)->first();
+                if (!$legalDoc) {
+                    return response()->json([]);
+                }
+                // Sync: buat di folders table juga
+                $folderModel = Folder::firstOrCreate(['name' => $decodedFolder]);
             }
 
             // Ambil files dari database
@@ -95,8 +90,6 @@ class LegalDocumentController extends Controller
                         'size' => $this->formatFileSize($doc->file_path),
                     ];
                 });
-
-            Log::info('Files loaded', ['count' => $files->count()]);
 
             return response()->json($files);
         } catch (\Throwable $e) {
@@ -132,12 +125,15 @@ class LegalDocumentController extends Controller
             File::makeDirectory($path, 0755, true);
         }
 
-        // ✅ Simpan ke legal_documents (bukan folders)
-        $folder = LegalDocument::firstOrCreate(['name' => $folderName]);
+        // Simpan ke legal_documents
+        $legalDoc = LegalDocument::firstOrCreate(['name' => $folderName]);
+
+        // Sync ke folders table (untuk FK constraint di documents table)
+        $folder = Folder::firstOrCreate(['name' => $folderName]);
 
         return response()->json([
             'success' => true,
-            'folder' => $folder
+            'folder' => $legalDoc
         ]);
     }
 
@@ -149,38 +145,23 @@ class LegalDocumentController extends Controller
             return response()->json(['message' => 'Filename is required'], 400);
         }
 
-        // Decode folder dari URL
         $decodedFolder = urldecode($folder);
 
-        // ✅ Reverse sanitize: ubah underscore kembali ke karakter asli
-        // Coba cari dengan nama yang di-decode dulu
-        $folderModel = LegalDocument::where('name', $decodedFolder)->first();
+        // Cari di folders table (yang di-reference oleh documents.folder_id)
+        $folderModel = Folder::where('name', $decodedFolder)->first();
 
-        // Jika tidak ketemu, coba cari dengan berbagai variasi
+        // Fallback: coba variasi nama
         if (!$folderModel) {
-            // Coba ganti underscore dengan spasi
-            $folderWithSpace = str_replace('_', ' ', $decodedFolder);
-            $folderModel = LegalDocument::where('name', $folderWithSpace)->first();
+            $folderModel = Folder::where('name', str_replace('_', ' ', $decodedFolder))->first();
+        }
+        if (!$folderModel) {
+            $folderModel = Folder::where('name', str_replace('_', '&', $decodedFolder))->first();
+        }
+        if (!$folderModel) {
+            $folderModel = Folder::where('name', str_replace('_and_', ' & ', $decodedFolder))->first();
         }
 
         if (!$folderModel) {
-            // Coba ganti underscore dengan &
-            $folderWithAmpersand = str_replace('_', '&', $decodedFolder);
-            $folderModel = LegalDocument::where('name', $folderWithAmpersand)->first();
-        }
-
-        if (!$folderModel) {
-            // Coba ganti "and" dengan &
-            $folderWithAmpersand2 = str_replace('_and_', ' & ', $decodedFolder);
-            $folderModel = LegalDocument::where('name', $folderWithAmpersand2)->first();
-        }
-
-        if (!$folderModel) {
-            Log::error('Folder not found', [
-                'decoded' => $decodedFolder,
-                'raw' => $folder,
-                'available_folders' => LegalDocument::pluck('name')->toArray()
-            ]);
             return response()->json(['message' => 'Folder not found'], 404);
         }
 
@@ -235,11 +216,11 @@ class LegalDocumentController extends Controller
             }
 
             // Cari folder di database dengan nama asli
-            $folderModel = LegalDocument::where('name', $decodedFolder)->first();
+            $legalDoc = LegalDocument::where('name', $decodedFolder)->first();
 
-            if (!$folderModel) {
+            if (!$legalDoc) {
                 // Jika folder tidak ada di database, buat dulu
-                $folderModel = LegalDocument::create(['name' => $decodedFolder]);
+                $legalDoc = LegalDocument::create(['name' => $decodedFolder]);
 
                 // Buat folder fisik juga
                 $physicalPath = storage_path("app/public/legal-documents/{$decodedFolder}");
@@ -248,9 +229,12 @@ class LegalDocumentController extends Controller
                 }
             }
 
-            // Simpan metadata file
+            // Sync ke folders table (FK constraint di documents table references folders.id)
+            $folder = Folder::firstOrCreate(['name' => $decodedFolder]);
+
+            // Simpan metadata file menggunakan folders.id (bukan legal_documents.id)
             Document::create([
-                'folder_id' => $folderModel->id,
+                'folder_id' => $folder->id,
                 'file_name' => $file->getClientOriginalName(),
                 'file_path' => $path,
                 'file_type' => $file->getClientOriginalExtension(),
@@ -281,8 +265,7 @@ class LegalDocumentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Upload gagal: ' . $e->getMessage(),
-                'error' => $e->getMessage(),
+                'message' => 'Failed to upload file. Please try again.',
             ], 500);
         }
     }
@@ -314,10 +297,23 @@ class LegalDocumentController extends Controller
         $newName = $request->new_name;
 
         try {
-            // Update database - use LegalDocument model
-            $folder = LegalDocument::where('name', $oldName)->firstOrFail();
-            $folder->name = $newName;
-            $folder->save();
+            // Update legal_documents table
+            $legalDoc = LegalDocument::where('name', $oldName)->firstOrFail();
+            $legalDoc->name = $newName;
+            $legalDoc->save();
+
+            // Update folders table
+            $folder = Folder::where('name', $oldName)->first();
+            if ($folder) {
+                $folder->name = $newName;
+                $folder->save();
+
+                // Update file paths in documents table
+                Document::where('folder_id', $folder->id)->get()->each(function ($doc) use ($oldName, $newName) {
+                    $doc->file_path = str_replace("legal-documents/{$oldName}/", "legal-documents/{$newName}/", $doc->file_path);
+                    $doc->save();
+                });
+            }
 
             // Rename physical folder
             $oldPath = storage_path("app/public/legal-documents/{$oldName}");
@@ -326,12 +322,6 @@ class LegalDocumentController extends Controller
             if (File::exists($oldPath)) {
                 File::move($oldPath, $newPath);
             }
-
-            // Update file paths in documents table
-            Document::where('folder_id', $folder->id)->get()->each(function ($doc) use ($oldName, $newName) {
-                $doc->file_path = str_replace("legal-documents/{$oldName}/", "legal-documents/{$newName}/", $doc->file_path);
-                $doc->save();
-            });
 
             return response()->json(['success' => true, 'message' => 'Folder renamed successfully']);
         } catch (\Exception $e) {
@@ -349,14 +339,16 @@ class LegalDocumentController extends Controller
         $folderName = $request->name;
 
         try {
-            // Delete from database - use LegalDocument model
-            $folder = LegalDocument::where('name', $folderName)->firstOrFail();
+            // Delete from legal_documents table
+            $legalDoc = LegalDocument::where('name', $folderName)->firstOrFail();
+            $legalDoc->delete();
 
-            // Delete all documents in this folder
-            Document::where('folder_id', $folder->id)->delete();
-
-            // Delete folder record
-            $folder->delete();
+            // Delete from folders table + cascade documents
+            $folder = Folder::where('name', $folderName)->first();
+            if ($folder) {
+                Document::where('folder_id', $folder->id)->delete();
+                $folder->delete();
+            }
 
             // Delete physical folder
             $folderPath = storage_path("app/public/legal-documents/{$folderName}");

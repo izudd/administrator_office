@@ -61,35 +61,53 @@
             </div>
 
             <!-- Toast Notification -->
-            <div x-show="toast.show" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 translate-y-2" class="fixed top-6 right-6 z-[100] max-w-sm">
-                <div class="rounded-2xl shadow-2xl backdrop-blur-xl border overflow-hidden"
+            <div x-show="toast.show" x-transition:enter="transition ease-out duration-500"
+                x-transition:enter-start="opacity-0 -translate-y-4 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                x-transition:leave-end="opacity-0 -translate-y-4 scale-95" class="fixed top-6 right-6 z-[100] w-96 max-w-[calc(100vw-2rem)]">
+                <div class="rounded-2xl shadow-2xl overflow-hidden border"
                     :class="{
-                        'bg-emerald-500/90 border-emerald-400': toast.type === 'success',
-                        'bg-red-500/90 border-red-400': toast.type === 'error',
-                        'bg-blue-500/90 border-blue-400': toast.type === 'info'
+                        'bg-white border-emerald-200': toast.type === 'success',
+                        'bg-white border-red-200': toast.type === 'error',
+                        'bg-white border-blue-200': toast.type === 'info'
                     }">
+                    <!-- Top color bar -->
+                    <div class="h-1"
+                        :class="{
+                            'bg-gradient-to-r from-emerald-400 to-teal-400': toast.type === 'success',
+                            'bg-gradient-to-r from-red-400 to-rose-400': toast.type === 'error',
+                            'bg-gradient-to-r from-blue-400 to-cyan-400': toast.type === 'info'
+                        }"></div>
                     <div class="p-4 flex items-start gap-3">
-                        <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                            <i class="text-white text-xl"
+                        <div class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+                            :class="{
+                                'bg-emerald-50 text-emerald-500': toast.type === 'success',
+                                'bg-red-50 text-red-500': toast.type === 'error',
+                                'bg-blue-50 text-blue-500': toast.type === 'info'
+                            }">
+                            <i class="text-lg"
                                 :class="{
-                                    'fa-solid fa-check': toast.type === 'success',
-                                    'fa-solid fa-exclamation': toast.type === 'error',
-                                    'fa-solid fa-info': toast.type === 'info'
+                                    'fa-solid fa-circle-check': toast.type === 'success',
+                                    'fa-solid fa-circle-exclamation': toast.type === 'error',
+                                    'fa-solid fa-circle-info': toast.type === 'info'
                                 }"></i>
                         </div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-white" x-text="toast.title"></h4>
-                            <p class="text-sm text-white/90 mt-0.5" x-text="toast.message"></p>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-gray-800 text-sm" x-text="toast.title"></h4>
+                            <p class="text-sm text-gray-500 mt-0.5 break-words" x-text="toast.message"></p>
                         </div>
-                        <button @click="toast.show = false" class="flex-shrink-0 text-white/80 hover:text-white">
-                            <i class="fa-solid fa-xmark"></i>
+                        <button @click="toast.show = false" class="flex-shrink-0 w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
+                            <i class="fa-solid fa-xmark text-sm"></i>
                         </button>
                     </div>
-                    <div class="h-1 bg-white/20">
-                        <div class="h-full bg-white/60 transition-all duration-[3000ms] ease-linear"
+                    <!-- Progress bar -->
+                    <div class="h-0.5 bg-gray-100">
+                        <div class="h-full transition-all duration-[4000ms] ease-linear rounded-full"
+                            :class="{
+                                'bg-emerald-400': toast.type === 'success',
+                                'bg-red-400': toast.type === 'error',
+                                'bg-blue-400': toast.type === 'info'
+                            }"
                             :style="toast.show ? 'width: 0%' : 'width: 100%'"></div>
                     </div>
                 </div>
@@ -708,7 +726,7 @@
 
                 showToast(type, title, message) {
                     this.toast = { show: true, type, title, message };
-                    setTimeout(() => { this.toast.show = false; }, 3000);
+                    setTimeout(() => { this.toast.show = false; }, 4000);
                 },
 
                 async openFolder(folderName, evt = null) {
