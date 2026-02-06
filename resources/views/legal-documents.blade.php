@@ -361,134 +361,180 @@
                 </div>
             </main>
 
-            <!-- Slide-in Panel -->
-            <div x-show="showFolderPanel" x-transition:enter="transition ease-out duration-400"
-                x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
-                x-transition:leave="transition ease-in duration-400"
-                x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
-                @keydown.window.escape="closePanel()" class="fixed right-0 top-[var(--header-height)] z-50"
-                :class="{ 'w-full sm:w-[55%] md:w-[560px]': true }" style="height: calc(100vh - var(--header-height));">
+            <!-- Folder Files Modal (Full-screen overlay) -->
+            <div x-show="showFolderPanel"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @keydown.window.escape="closePanel()"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 sm:p-6">
 
-                <div class="h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl border-l border-gray-200 dark:border-gray-700 shadow-2xl overflow-y-auto">
-                    <div class="p-6">
-                        <!-- Header -->
-                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+                <!-- Modal Card -->
+                <div x-show="showFolderPanel"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                    @click.away="closePanel()"
+                    class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
+
+                    <!-- Modal Header -->
+                    <div class="flex-shrink-0 px-6 pt-6 pb-4 border-b border-gray-100 dark:border-gray-800">
+                        <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">
-                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-xl">
-                                    <i class="fa-solid fa-folder-open text-white text-xl"></i>
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                                    <i class="fa-solid fa-folder-open text-white text-lg"></i>
                                 </div>
                                 <div>
                                     <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100" x-text="selectedFolder || 'Folder'"></h2>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
                                         <i class="fa-solid fa-file text-xs"></i>
-                                        <span x-text="files.length ? (files.length + ' files') : 'No files'"></span>
+                                        <span x-text="files.length ? (files.length + ' files') : 'No files yet'"></span>
+                                        <span class="text-gray-300 dark:text-gray-600">|</span>
+                                        <i class="fa-solid fa-shield-halved text-xs text-emerald-500"></i>
+                                        <span class="text-emerald-500 text-xs font-medium">Encrypted</span>
                                     </p>
                                 </div>
                             </div>
-                            <button @click="closePanel"
-                                class="w-10 h-10 rounded-xl text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors">
-                                <i class="fa-solid fa-xmark text-xl"></i>
+                            <button @click="closePanel()"
+                                class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-all">
+                                <i class="fa-solid fa-xmark text-lg"></i>
                             </button>
                         </div>
 
-                        <!-- Search -->
-                        <div class="mb-6">
+                        <!-- Search Bar -->
+                        <div class="mt-4">
                             <div class="relative">
-                                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                <input x-model="search" type="text" placeholder="Search files..."
-                                    class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all" />
+                                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                                <input x-model="search" type="text" placeholder="Search files in this folder..."
+                                    class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all" />
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Skeleton -->
+                    <!-- Modal Body (Scrollable) -->
+                    <div class="flex-1 overflow-y-auto px-6 py-4">
+                        <!-- Loading Skeleton -->
                         <template x-if="loading">
                             <div class="space-y-3">
-                                <div class="h-20 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-xl animate-pulse"></div>
-                                <div class="h-20 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-xl animate-pulse"></div>
-                                <div class="h-20 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-xl animate-pulse"></div>
-                            </div>
-                        </template>
-
-                        <!-- File List -->
-                        <template x-if="!loading && filteredFiles().length">
-                            <div class="space-y-3">
-                                <template x-for="f in filteredFiles()" :key="f.file_name">
-                                    <div class="group p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 hover:from-emerald-50 hover:to-teal-50 dark:hover:from-emerald-900/20 dark:hover:to-teal-900/20 border border-gray-200 dark:border-gray-600 transition-all duration-200 hover:shadow-lg">
-                                        <div class="flex items-center justify-between">
-                                            <div class="flex items-center gap-4 min-w-0 flex-1">
-                                                <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                                                    <i class="fa-solid fa-file-pdf text-white text-xl"></i>
-                                                </div>
-                                                <div class="min-w-0 flex-1">
-                                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" x-text="f.file_name"></div>
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-2">
-                                                        <i class="fa-solid fa-database"></i>
-                                                        <span x-text="f.size || ''"></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button @click="previewFile(f.file_name)"
-                                                    class="w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-colors shadow-md hover:shadow-lg"
-                                                    title="Preview">
-                                                    <i class="fa-solid fa-eye"></i>
-                                                </button>
-                                                <button @click="deleteFile(f.file_name)"
-                                                    class="w-10 h-10 rounded-xl bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-colors shadow-md hover:shadow-lg"
-                                                    title="Delete">
-                                                    <i class="fa-solid fa-trash"></i>
-                                                </button>
-                                            </div>
+                                <template x-for="i in 4" :key="i">
+                                    <div class="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 animate-pulse">
+                                        <div class="w-12 h-12 rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+                                        <div class="flex-1 space-y-2">
+                                            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4"></div>
+                                            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/3"></div>
                                         </div>
                                     </div>
                                 </template>
                             </div>
                         </template>
 
-                        <!-- Empty -->
-                        <template x-if="!loading && !filteredFiles().length">
-                            <div class="text-center text-gray-500 dark:text-gray-400 py-16">
-                                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
-                                    <i class="fa-solid fa-box-open text-4xl"></i>
-                                </div>
-                                <p class="text-lg font-medium">No files found</p>
-                                <p class="text-sm mt-1">Upload your first document below</p>
+                        <!-- File List -->
+                        <template x-if="!loading && filteredFiles().length">
+                            <div class="space-y-2">
+                                <template x-for="(f, idx) in filteredFiles()" :key="f.file_name">
+                                    <div class="group flex items-center gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-emerald-200 dark:hover:border-emerald-800 bg-white dark:bg-gray-800/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-all duration-200 hover:shadow-md">
+                                        <!-- File Icon -->
+                                        <div class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-sm"
+                                            :class="getFileIconClass(f.file_name)">
+                                            <i class="text-white text-lg" :class="getFileIcon(f.file_name)"></i>
+                                        </div>
+
+                                        <!-- File Info -->
+                                        <div class="min-w-0 flex-1">
+                                            <div class="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" x-text="f.file_name"></div>
+                                            <div class="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-3">
+                                                <span class="flex items-center gap-1">
+                                                    <i class="fa-solid fa-hard-drive"></i>
+                                                    <span x-text="f.size || 'N/A'"></span>
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <i class="fa-solid fa-tag"></i>
+                                                    <span x-text="f.file_name.split('.').pop().toUpperCase()"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Actions -->
+                                        <div class="flex items-center gap-2 flex-shrink-0">
+                                            <button @click="previewFile(f.file_name)"
+                                                class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-all hover:scale-110"
+                                                title="Preview">
+                                                <i class="fa-solid fa-eye text-sm"></i>
+                                            </button>
+                                            <a :href="f.url" download
+                                                class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center transition-all hover:scale-110"
+                                                title="Download">
+                                                <i class="fa-solid fa-download text-sm"></i>
+                                            </a>
+                                            <button @click="deleteFile(f.file_name)"
+                                                class="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-500 dark:text-red-400 flex items-center justify-center transition-all hover:scale-110"
+                                                title="Delete">
+                                                <i class="fa-solid fa-trash text-sm"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </template>
 
-                        <!-- Upload Area -->
-                        <div class="mt-8">
-                            <div class="border-2 border-dashed border-emerald-300 dark:border-emerald-700 rounded-2xl p-8 text-center bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-900/10 dark:to-teal-900/10 hover:border-emerald-400 dark:hover:border-emerald-600 transition-all cursor-pointer group"
-                                @dragover.prevent @drop.prevent="onDrop($event)" @click="$refs.fileInput.click()">
-
-                                <input type="file" x-ref="fileInput" class="hidden" @change="onFileChange($event)" />
-
-                                <div class="flex flex-col items-center gap-4">
-                                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                                        <i class="fa-solid fa-cloud-arrow-up text-3xl text-white"></i>
+                        <!-- Empty State -->
+                        <template x-if="!loading && !filteredFiles().length">
+                            <div class="text-center py-16">
+                                <div class="relative inline-block mb-6">
+                                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-full blur-2xl opacity-20 animate-pulse"></div>
+                                    <div class="relative w-24 h-24 rounded-full bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center">
+                                        <i class="fa-solid fa-file-circle-plus text-4xl text-gray-300 dark:text-gray-600"></i>
                                     </div>
-                                    <div>
-                                        <div class="text-base font-bold text-gray-700 dark:text-gray-200">
-                                            Drop files here or click to browse
-                                        </div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Maximum file size: 5MB
-                                        </div>
-                                    </div>
-
-                                    <template x-if="uploading">
-                                        <div class="w-full mt-4">
-                                            <div class="w-full bg-gray-200 dark:bg-gray-700 h-3 rounded-full overflow-hidden shadow-inner">
-                                                <div class="h-3 bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300 rounded-full" :style="`width: ${progress}%`"></div>
-                                            </div>
-                                            <div class="flex justify-between items-center mt-2">
-                                                <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400" x-text="progress + '%'"></span>
-                                                <span class="text-xs text-gray-500">Uploading...</span>
-                                            </div>
-                                        </div>
-                                    </template>
                                 </div>
+                                <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300 mb-1">No files found</h3>
+                                <p class="text-sm text-gray-400 dark:text-gray-500">Upload your first document using the area below</p>
                             </div>
+                        </template>
+                    </div>
+
+                    <!-- Modal Footer: Upload Area -->
+                    <div class="flex-shrink-0 px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+                        <div class="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center hover:border-emerald-400 dark:hover:border-emerald-600 bg-white dark:bg-gray-800/50 transition-all cursor-pointer group"
+                            @dragover.prevent="$el.classList.add('border-emerald-400','bg-emerald-50/50')"
+                            @dragleave.prevent="$el.classList.remove('border-emerald-400','bg-emerald-50/50')"
+                            @drop.prevent="$el.classList.remove('border-emerald-400','bg-emerald-50/50'); onDrop($event)"
+                            @click="$refs.fileInput.click()">
+
+                            <input type="file" x-ref="fileInput" class="hidden" @change="onFileChange($event)" multiple />
+
+                            <template x-if="!uploading">
+                                <div class="flex items-center justify-center gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                                        <i class="fa-solid fa-cloud-arrow-up text-lg text-white"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                                            Drop files here or <span class="text-emerald-600 dark:text-emerald-400">click to browse</span>
+                                        </p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                                            PDF, DOC, XLS, IMG up to 5MB
+                                        </p>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template x-if="uploading">
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="font-medium text-emerald-600 dark:text-emerald-400">Uploading...</span>
+                                        <span class="text-gray-500" x-text="progress + '%'"></span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300 rounded-full" :style="`width: ${progress}%`"></div>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -798,6 +844,40 @@
                 filteredFiles() {
                     if (!this.search) return this.files;
                     return this.files.filter(f => (f.file_name || '').toLowerCase().includes(this.search.toLowerCase()));
+                },
+
+                getFileIcon(fileName) {
+                    const ext = (fileName || '').split('.').pop().toLowerCase();
+                    const map = {
+                        'pdf': 'fa-solid fa-file-pdf',
+                        'doc': 'fa-solid fa-file-word',
+                        'docx': 'fa-solid fa-file-word',
+                        'xls': 'fa-solid fa-file-excel',
+                        'xlsx': 'fa-solid fa-file-excel',
+                        'ppt': 'fa-solid fa-file-powerpoint',
+                        'pptx': 'fa-solid fa-file-powerpoint',
+                        'jpg': 'fa-solid fa-file-image',
+                        'jpeg': 'fa-solid fa-file-image',
+                        'png': 'fa-solid fa-file-image',
+                        'gif': 'fa-solid fa-file-image',
+                        'webp': 'fa-solid fa-file-image',
+                        'zip': 'fa-solid fa-file-zipper',
+                        'rar': 'fa-solid fa-file-zipper',
+                        'txt': 'fa-solid fa-file-lines',
+                        'csv': 'fa-solid fa-file-csv',
+                    };
+                    return map[ext] || 'fa-solid fa-file';
+                },
+
+                getFileIconClass(fileName) {
+                    const ext = (fileName || '').split('.').pop().toLowerCase();
+                    if (['pdf'].includes(ext)) return 'bg-gradient-to-br from-red-500 to-rose-600';
+                    if (['doc', 'docx'].includes(ext)) return 'bg-gradient-to-br from-blue-500 to-indigo-600';
+                    if (['xls', 'xlsx', 'csv'].includes(ext)) return 'bg-gradient-to-br from-emerald-500 to-green-600';
+                    if (['ppt', 'pptx'].includes(ext)) return 'bg-gradient-to-br from-orange-500 to-amber-600';
+                    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'bg-gradient-to-br from-purple-500 to-violet-600';
+                    if (['zip', 'rar'].includes(ext)) return 'bg-gradient-to-br from-amber-500 to-yellow-600';
+                    return 'bg-gradient-to-br from-gray-500 to-gray-600';
                 },
 
                 onDrop(e) {
