@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\PartnerDocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,6 +81,18 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
     Route::post('/inventory/{id}/loan', [InventoryController::class, 'loan'])->name('inventory.loan');
     Route::post('/inventory/{id}/return', [InventoryController::class, 'returnAsset'])->name('inventory.return');
+
+    // Partner Documents Routes
+    Route::get('/partner-documents', [PartnerDocumentController::class, 'index'])->name('partner-documents.index');
+    Route::post('/partner-documents/category/create', [PartnerDocumentController::class, 'createCategory'])->name('partner-documents.category.create');
+    Route::post('/partner-documents/category/rename', [PartnerDocumentController::class, 'renameCategory'])->name('partner-documents.category.rename');
+    Route::post('/partner-documents/category/delete', [PartnerDocumentController::class, 'deleteCategory'])->name('partner-documents.category.delete');
+    Route::get('/partner-documents/{categoryId}/documents', [PartnerDocumentController::class, 'getDocuments'])->name('partner-documents.documents');
+    Route::post('/partner-documents/{categoryId}/upload', [PartnerDocumentController::class, 'uploadDocument'])->name('partner-documents.upload');
+    Route::post('/partner-documents/document/{documentId}/delete', [PartnerDocumentController::class, 'deleteDocument'])->name('partner-documents.document.delete');
+    Route::post('/partner-documents/document/{documentId}/update', [PartnerDocumentController::class, 'updateDocument'])->name('partner-documents.document.update');
+    Route::get('/partner-documents/preview/{documentId}', [PartnerDocumentController::class, 'previewDocument'])->name('partner-documents.preview');
+    Route::get('/partner-documents/download/{documentId}', [PartnerDocumentController::class, 'downloadDocument'])->name('partner-documents.download');
 });
 
 

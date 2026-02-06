@@ -47,7 +47,7 @@
                     <span x-show="!sidebarCollapsed" class="ml-3">Legal Documents</span>
                 </a>
 
-                <a href="#" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                <a href="{{ route('partner-documents.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
                     <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-purple-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-purple-500/30 group-hover:scale-110">
                         <i class="fa-solid fa-handshake text-sm"></i>
                     </div>
@@ -295,7 +295,7 @@
                         </a>
 
                         <!-- Partner Docs -->
-                        <a href="#" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-purple-400 dark:hover:border-purple-500 transition-all hover:shadow-2xl hover:shadow-purple-500/10 overflow-hidden">
+                        <a href="{{ route('partner-documents.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-purple-400 dark:hover:border-purple-500 transition-all hover:shadow-2xl hover:shadow-purple-500/10 overflow-hidden">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
                             <div class="relative">
                                 <div class="flex items-center justify-between mb-4">
@@ -543,7 +543,7 @@
                     <i class="fa-solid fa-boxes-stacked w-5"></i>
                     <span>Inventory</span>
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
+                <a href="{{ route('partner-documents.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
                     <i class="fa-solid fa-handshake w-5"></i>
                     <span>Partner Docs</span>
                 </a>
