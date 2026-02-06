@@ -11,6 +11,7 @@ class PartnerDocument extends Model
 
     protected $fillable = [
         'category_id',
+        'partner_id',
         'partner_name',
         'document_type',
         'file_name',
@@ -31,6 +32,11 @@ class PartnerDocument extends Model
     public function category()
     {
         return $this->belongsTo(PartnerCategory::class, 'category_id');
+    }
+
+    public function partner()
+    {
+        return $this->belongsTo(Partner::class, 'partner_id');
     }
 
     // Scopes

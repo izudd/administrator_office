@@ -87,12 +87,32 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/partner-documents/category/create', [PartnerDocumentController::class, 'createCategory'])->name('partner-documents.category.create');
     Route::post('/partner-documents/category/rename', [PartnerDocumentController::class, 'renameCategory'])->name('partner-documents.category.rename');
     Route::post('/partner-documents/category/delete', [PartnerDocumentController::class, 'deleteCategory'])->name('partner-documents.category.delete');
-    Route::get('/partner-documents/{categoryId}/documents', [PartnerDocumentController::class, 'getDocuments'])->name('partner-documents.documents');
-    Route::post('/partner-documents/{categoryId}/upload', [PartnerDocumentController::class, 'uploadDocument'])->name('partner-documents.upload');
     Route::post('/partner-documents/document/{documentId}/delete', [PartnerDocumentController::class, 'deleteDocument'])->name('partner-documents.document.delete');
     Route::post('/partner-documents/document/{documentId}/update', [PartnerDocumentController::class, 'updateDocument'])->name('partner-documents.document.update');
     Route::get('/partner-documents/preview/{documentId}', [PartnerDocumentController::class, 'previewDocument'])->name('partner-documents.preview');
     Route::get('/partner-documents/download/{documentId}', [PartnerDocumentController::class, 'downloadDocument'])->name('partner-documents.download');
+
+    // Partner Management Routes (integrated from PMS) - MUST be before wildcard {categoryId}
+    Route::get('/partner-documents/partners', [PartnerDocumentController::class, 'getPartners'])->name('partner-documents.partners.index');
+    Route::post('/partner-documents/partners', [PartnerDocumentController::class, 'storePartner'])->name('partner-documents.partners.store');
+    Route::get('/partner-documents/partners/{id}', [PartnerDocumentController::class, 'getPartner'])->name('partner-documents.partners.show');
+    Route::put('/partner-documents/partners/{id}', [PartnerDocumentController::class, 'updatePartner'])->name('partner-documents.partners.update');
+    Route::delete('/partner-documents/partners/{id}', [PartnerDocumentController::class, 'deletePartner'])->name('partner-documents.partners.destroy');
+    Route::post('/partner-documents/partners/{id}/activate', [PartnerDocumentController::class, 'activatePartner'])->name('partner-documents.partners.activate');
+    Route::post('/partner-documents/partners/{id}/suspend', [PartnerDocumentController::class, 'suspendPartner'])->name('partner-documents.partners.suspend');
+
+    // Revenue Routes
+    Route::get('/partner-documents/revenues', [PartnerDocumentController::class, 'getRevenues'])->name('partner-documents.revenues.index');
+    Route::post('/partner-documents/revenues', [PartnerDocumentController::class, 'storeRevenue'])->name('partner-documents.revenues.store');
+    Route::put('/partner-documents/revenues/{id}', [PartnerDocumentController::class, 'updateRevenue'])->name('partner-documents.revenues.update');
+    Route::delete('/partner-documents/revenues/{id}', [PartnerDocumentController::class, 'deleteRevenue'])->name('partner-documents.revenues.destroy');
+
+    // Analytics Route
+    Route::get('/partner-documents/analytics', [PartnerDocumentController::class, 'getAnalytics'])->name('partner-documents.analytics');
+
+    // Wildcard routes LAST (to avoid conflicts)
+    Route::get('/partner-documents/{categoryId}/documents', [PartnerDocumentController::class, 'getDocuments'])->name('partner-documents.documents');
+    Route::post('/partner-documents/{categoryId}/upload', [PartnerDocumentController::class, 'uploadDocument'])->name('partner-documents.upload');
 });
 
 
