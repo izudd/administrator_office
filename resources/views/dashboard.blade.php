@@ -68,20 +68,6 @@
                     <span x-show="!sidebarCollapsed" class="ml-3">Partner Docs</span>
                 </a>
 
-                <a href="#" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
-                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-amber-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-amber-500/30 group-hover:scale-110">
-                        <i class="fa-solid fa-box-archive text-sm"></i>
-                    </div>
-                    <span x-show="!sidebarCollapsed" class="ml-3">Archive Records</span>
-                </a>
-
-                <a href="#" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
-                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-indigo-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-indigo-500/30 group-hover:scale-110">
-                        <i class="fa-solid fa-graduation-cap text-sm"></i>
-                    </div>
-                    <span x-show="!sidebarCollapsed" class="ml-3">Training Material</span>
-                </a>
-
                 <p x-show="!sidebarCollapsed" class="px-4 py-2 mt-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Management</p>
 
                 <a href="{{ route('inventory.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
@@ -91,19 +77,6 @@
                     <span x-show="!sidebarCollapsed" class="ml-3">Inventory</span>
                 </a>
 
-                <a href="#" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
-                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-emerald-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-emerald-500/30 group-hover:scale-110">
-                        <i class="fa-solid fa-chart-pie text-sm"></i>
-                    </div>
-                    <span x-show="!sidebarCollapsed" class="ml-3">Financial Reports</span>
-                </a>
-
-                <a href="#" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
-                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-rose-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-rose-500/30 group-hover:scale-110">
-                        <i class="fa-solid fa-receipt text-sm"></i>
-                    </div>
-                    <span x-show="!sidebarCollapsed" class="ml-3">Finance & Tax</span>
-                </a>
             </nav>
 
             <!-- User Section -->
@@ -388,54 +361,6 @@
                             </div>
                         </a>
 
-                        <!-- Archive Records -->
-                        <a href="#" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 transition-all hover:shadow-2xl hover:shadow-amber-500/10 overflow-hidden">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
-                            <div class="relative">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/30 group-hover:scale-110 transition-transform">
-                                        <i class="fa-solid fa-box-archive text-white text-xl"></i>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">256</span>
-                                        <p class="text-xs text-slate-500">records</p>
-                                    </div>
-                                </div>
-                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Archive Records</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Historical documents and archives</p>
-                                <div class="flex items-center gap-4 text-xs text-slate-500">
-                                    <span class="flex items-center gap-1.5">
-                                        <i class="fa-solid fa-clock-rotate-left"></i>
-                                        Since 2016
-                                    </span>
-                                </div>
-                            </div>
-                        </a>
-
-                        <!-- Training Material -->
-                        <a href="#" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all hover:shadow-2xl hover:shadow-indigo-500/10 overflow-hidden">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-violet-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
-                            <div class="relative">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-xl shadow-indigo-500/30 group-hover:scale-110 transition-transform">
-                                        <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">45</span>
-                                        <p class="text-xs text-slate-500">materials</p>
-                                    </div>
-                                </div>
-                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Training Material</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Learning resources and guides</p>
-                                <div class="flex items-center gap-4 text-xs text-slate-500">
-                                    <span class="flex items-center gap-1.5">
-                                        <i class="fa-solid fa-video"></i>
-                                        12 videos
-                                    </span>
-                                </div>
-                            </div>
-                        </a>
-
                         <!-- Inventory -->
                         <a href="{{ route('inventory.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-teal-400 dark:hover:border-teal-500 transition-all hover:shadow-2xl hover:shadow-teal-500/10 overflow-hidden">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
@@ -460,58 +385,12 @@
                             </div>
                         </a>
 
-                        <!-- Financial Reports -->
-                        <a href="#" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-500 transition-all hover:shadow-2xl hover:shadow-emerald-500/10 overflow-hidden">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
-                            <div class="relative">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-xl shadow-emerald-500/30 group-hover:scale-110 transition-transform">
-                                        <i class="fa-solid fa-chart-pie text-white text-xl"></i>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">34</span>
-                                        <p class="text-xs text-slate-500">reports</p>
-                                    </div>
-                                </div>
-                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Financial Reports</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Financial statements and analysis</p>
-                                <div class="flex items-center gap-4 text-xs text-slate-500">
-                                    <span class="flex items-center gap-1.5">
-                                        <i class="fa-solid fa-calendar"></i>
-                                        Q4 2025
-                                    </span>
-                                </div>
-                            </div>
-                        </a>
                     </div>
                 </div>
 
-                <!-- Bottom Row: Finance & Tax + Recent Activity -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Finance & Tax Card -->
-                    <a href="#" class="group relative bg-gradient-to-br from-rose-500 via-pink-500 to-rose-600 rounded-2xl p-6 text-white hover:shadow-2xl hover:shadow-rose-500/30 transition-all overflow-hidden">
-                        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOGMxLjI1NCAwIDIuNDgtLjEyOCAzLjY2Mi0uMzcxIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9nPjwvc3ZnPg==')] opacity-30"></div>
-                        <div class="relative">
-                            <div class="flex items-center justify-between mb-6">
-                                <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-receipt text-2xl"></i>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-3xl font-bold">67</span>
-                                    <p class="text-xs text-rose-200">reports</p>
-                                </div>
-                            </div>
-                            <h3 class="text-xl font-bold mb-2">Finance & Tax</h3>
-                            <p class="text-sm text-rose-100 mb-4">Tax documents, invoices, and financial records</p>
-                            <div class="flex items-center gap-2 text-sm">
-                                <span class="px-3 py-1 bg-white/20 rounded-full">2025 Filings</span>
-                                <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Recent Activity -->
-                    <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800">
+                <!-- Recent Activity -->
+                <div class="mb-8">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800">
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <i class="fa-solid fa-clock-rotate-left text-emerald-500"></i>
@@ -624,10 +503,6 @@
                 <a href="{{ route('partner-documents.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
                     <i class="fa-solid fa-handshake w-5"></i>
                     <span>Partner Docs</span>
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
-                    <i class="fa-solid fa-box-archive w-5"></i>
-                    <span>Archive Records</span>
                 </a>
             </nav>
 
