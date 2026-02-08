@@ -1,10 +1,30 @@
 <x-app-layout>
-    <div x-data="{ darkMode: localStorage.getItem('theme') === 'dark', sidebarCollapsed: false, mobileMenuOpen: false }"
+    <div x-data="{
+            darkMode: localStorage.getItem('theme') === 'dark',
+            sidebarCollapsed: false,
+            mobileMenuOpen: false,
+            currentTime: '',
+            greeting: '',
+            initClock() {
+                const update = () => {
+                    const now = new Date();
+                    const h = now.getHours();
+                    this.currentTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    if (h >= 5 && h < 11) this.greeting = 'Selamat Pagi';
+                    else if (h >= 11 && h < 15) this.greeting = 'Selamat Siang';
+                    else if (h >= 15 && h < 18) this.greeting = 'Selamat Sore';
+                    else this.greeting = 'Selamat Malam';
+                };
+                update();
+                setInterval(update, 1000);
+            }
+         }"
          x-init="$watch('darkMode', val => {
             localStorage.setItem('theme', val ? 'dark' : 'light');
             document.documentElement.classList.toggle('dark', val);
          });
-         document.documentElement.classList.toggle('dark', darkMode);"
+         document.documentElement.classList.toggle('dark', darkMode);
+         initClock();"
          class="min-h-screen flex bg-slate-100 dark:bg-slate-950 transition-colors duration-300">
 
         <!-- Sidebar -->
@@ -131,10 +151,15 @@
 
                     <!-- Title & Date -->
                     <div class="hidden sm:block">
-                        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Dashboard Overview</h1>
+                        <h1 class="text-xl font-bold text-slate-900 dark:text-white">
+                            <span x-text="greeting"></span>, {{ Auth::user()->name }}! <span class="text-lg">👋</span>
+                        </h1>
                         <p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
                             <i class="fa-solid fa-calendar-day"></i>
-                            {{ now()->format('l, F j, Y') }}
+                            {{ now()->translatedFormat('l, j F Y') }}
+                            <span class="text-slate-300 dark:text-slate-600">|</span>
+                            <i class="fa-solid fa-clock"></i>
+                            <span x-text="currentTime" class="font-mono tabular-nums"></span>
                         </p>
                     </div>
 
@@ -190,6 +215,42 @@
 
                         // Management stats
                         $managementCount = \App\Models\ManagementProfile::count();
+
+                        // Expiring documents (within 30 days) from all modules
+                        $expiringEmployeeFiles = \App\Models\EmployeeFile::with('employee')
+                            ->whereNotNull('expiry_date')
+                            ->where('expiry_date', '>=', now())
+                            ->where('expiry_date', '<=', now()->addDays(30))
+                            ->get();
+
+                        $expiringManagementFiles = \App\Models\ManagementFile::with('management')
+                            ->whereNotNull('expiry_date')
+                            ->where('expiry_date', '>=', now())
+                            ->where('expiry_date', '<=', now()->addDays(30))
+                            ->get();
+
+                        // AP Expiry (within 90 days)
+                        $expiringAP = \App\Models\ManagementProfile::whereNotNull('ap_expiry')
+                            ->where('ap_expiry', '>=', now())
+                            ->where('ap_expiry', '<=', now()->addDays(90))
+                            ->get();
+
+                        // Contracts expiring (PKWT with start_date + contract_duration)
+                        $expiringContracts = \App\Models\EmployeeContract::where('contract_type', 'PKWT')
+                            ->whereNotNull('start_date')
+                            ->whereNotNull('contract_duration')
+                            ->where('status', 'active')
+                            ->get()
+                            ->filter(function ($c) {
+                                $endDate = $c->start_date->copy()->addMonths((int)$c->contract_duration);
+                                return $endDate->greaterThanOrEqualTo(now()) && $endDate->lessThanOrEqualTo(now()->addDays(60));
+                            });
+
+                        $totalExpiring = $expiringEmployeeFiles->count() + $expiringManagementFiles->count() + $expiringAP->count() + $expiringContracts->count();
+
+                        // Active employees
+                        $activeEmployees = \App\Models\EmployeeProfile::where('status', 'active')->count();
+                        $activeManagement = \App\Models\ManagementProfile::where('status', 'active')->count();
                     } catch (\Exception $e) {
                         $totalFolders = 0;
                         $totalDocuments = 0;
@@ -201,6 +262,13 @@
                         $partnerCount = 0;
                         $partnerDocCount = 0;
                         $managementCount = 0;
+                        $expiringEmployeeFiles = collect();
+                        $expiringManagementFiles = collect();
+                        $expiringAP = collect();
+                        $expiringContracts = collect();
+                        $totalExpiring = 0;
+                        $activeEmployees = 0;
+                        $activeManagement = 0;
                     }
                 @endphp
 
@@ -271,6 +339,50 @@
                             </div>
                             <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ number_format($storageUsed, 1) }} <span class="text-lg font-normal text-slate-400">MB</span></div>
                             <div class="text-sm text-slate-500 dark:text-slate-400">Storage Used</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Summary Bar -->
+                <div class="mb-8 bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500 rounded-2xl p-[1px]">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 lg:p-5">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-users text-emerald-600 dark:text-emerald-400"></i>
+                                </div>
+                                <div>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $activeEmployees + $activeManagement }}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Personel Aktif</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/15 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-file-circle-check text-blue-600 dark:text-blue-400"></i>
+                                </div>
+                                <div>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $employeeContractCount }}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Kontrak Aktif</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl {{ $totalExpiring > 0 ? 'bg-red-100 dark:bg-red-500/15' : 'bg-slate-100 dark:bg-slate-800' }} flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-triangle-exclamation {{ $totalExpiring > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-400' }}"></i>
+                                </div>
+                                <div>
+                                    <p class="text-lg font-bold {{ $totalExpiring > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white' }}">{{ $totalExpiring }}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Akan Expired</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-500/15 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-upload text-purple-600 dark:text-purple-400"></i>
+                                </div>
+                                <div>
+                                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ $recentUploads }}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Upload 7 Hari</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -428,6 +540,130 @@
 
                     </div>
                 </div>
+
+                <!-- Expiring Documents Alert -->
+                @if($totalExpiring > 0)
+                <div class="mb-8">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-red-200 dark:border-red-500/30 overflow-hidden">
+                        <div class="bg-gradient-to-r from-red-500 to-orange-500 p-4 lg:p-5 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                    <i class="fa-solid fa-bell text-white text-lg animate-pulse"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-white font-bold text-lg">Peringatan Dokumen Expired</h3>
+                                    <p class="text-red-100 text-sm">{{ $totalExpiring }} dokumen/izin akan segera berakhir</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 lg:p-6 overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nama</th>
+                                        <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jenis Dokumen</th>
+                                        <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Modul</th>
+                                        <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tanggal Expired</th>
+                                        <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                    @foreach($expiringEmployeeFiles as $ef)
+                                    @php
+                                        $daysLeft = now()->diffInDays($ef->expiry_date, false);
+                                    @endphp
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                        <td class="py-3 px-4 font-medium text-slate-900 dark:text-white">{{ $ef->employee->employee_name ?? '-' }}</td>
+                                        <td class="py-3 px-4 text-slate-600 dark:text-slate-300">{{ $ef->document_type }}</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-1 text-xs font-medium bg-sky-100 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 rounded-lg">Legal Karyawan</span></td>
+                                        <td class="py-3 px-4 text-slate-600 dark:text-slate-300">{{ $ef->expiry_date->format('d M Y') }}</td>
+                                        <td class="py-3 px-4">
+                                            @if($daysLeft <= 7)
+                                                <span class="px-2.5 py-1 text-xs font-bold bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 rounded-full animate-pulse">{{ $daysLeft }} hari lagi</span>
+                                            @else
+                                                <span class="px-2.5 py-1 text-xs font-medium bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded-full">{{ $daysLeft }} hari lagi</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+
+                                    @foreach($expiringManagementFiles as $mf)
+                                    @php
+                                        $daysLeft = now()->diffInDays($mf->expiry_date, false);
+                                    @endphp
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                        <td class="py-3 px-4 font-medium text-slate-900 dark:text-white">{{ $mf->management->full_name ?? '-' }}</td>
+                                        <td class="py-3 px-4 text-slate-600 dark:text-slate-300">{{ $mf->document_type }}</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-1 text-xs font-medium bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 rounded-lg">Legal Management</span></td>
+                                        <td class="py-3 px-4 text-slate-600 dark:text-slate-300">{{ $mf->expiry_date->format('d M Y') }}</td>
+                                        <td class="py-3 px-4">
+                                            @if($daysLeft <= 7)
+                                                <span class="px-2.5 py-1 text-xs font-bold bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 rounded-full animate-pulse">{{ $daysLeft }} hari lagi</span>
+                                            @else
+                                                <span class="px-2.5 py-1 text-xs font-medium bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded-full">{{ $daysLeft }} hari lagi</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+
+                                    @foreach($expiringAP as $ap)
+                                    @php
+                                        $daysLeft = now()->diffInDays($ap->ap_expiry, false);
+                                    @endphp
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                        <td class="py-3 px-4 font-medium text-slate-900 dark:text-white">{{ $ap->full_name }}</td>
+                                        <td class="py-3 px-4 text-slate-600 dark:text-slate-300">Izin Akuntan Publik (AP)</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-1 text-xs font-medium bg-orange-100 dark:bg-orange-500/15 text-orange-700 dark:text-orange-300 rounded-lg">Izin AP</span></td>
+                                        <td class="py-3 px-4 text-slate-600 dark:text-slate-300">{{ $ap->ap_expiry->format('d M Y') }}</td>
+                                        <td class="py-3 px-4">
+                                            @if($daysLeft <= 14)
+                                                <span class="px-2.5 py-1 text-xs font-bold bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 rounded-full animate-pulse">{{ $daysLeft }} hari lagi</span>
+                                            @else
+                                                <span class="px-2.5 py-1 text-xs font-medium bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded-full">{{ $daysLeft }} hari lagi</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+
+                                    @foreach($expiringContracts as $ec)
+                                    @php
+                                        $endDate = $ec->start_date->copy()->addMonths((int)$ec->contract_duration);
+                                        $daysLeft = now()->diffInDays($endDate, false);
+                                    @endphp
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                        <td class="py-3 px-4 font-medium text-slate-900 dark:text-white">{{ $ec->employee_name }}</td>
+                                        <td class="py-3 px-4 text-slate-600 dark:text-slate-300">Kontrak PKWT</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-1 text-xs font-medium bg-cyan-100 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 rounded-lg">Kontrak Karyawan</span></td>
+                                        <td class="py-3 px-4 text-slate-600 dark:text-slate-300">{{ $endDate->format('d M Y') }}</td>
+                                        <td class="py-3 px-4">
+                                            @if($daysLeft <= 14)
+                                                <span class="px-2.5 py-1 text-xs font-bold bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 rounded-full animate-pulse">{{ $daysLeft }} hari lagi</span>
+                                            @else
+                                                <span class="px-2.5 py-1 text-xs font-medium bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded-full">{{ $daysLeft }} hari lagi</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                @else
+                <!-- All Clear Badge -->
+                <div class="mb-8">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-emerald-200 dark:border-emerald-500/30 p-5 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-emerald-700 dark:text-emerald-400">Semua Aman!</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ada dokumen atau izin yang akan expired dalam waktu dekat.</p>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Recent Activity -->
                 <div class="mb-8">
