@@ -176,6 +176,10 @@
 
                         // Employee documents count (unique employees)
                         $employeeDocCount = \App\Models\EmployeeProfile::count();
+
+                        // Partner stats
+                        $partnerCount = \App\Models\Partner::count();
+                        $partnerDocCount = \App\Models\PartnerDocument::count();
                     } catch (\Exception $e) {
                         $totalFolders = 0;
                         $totalDocuments = 0;
@@ -184,6 +188,8 @@
                         $inventoryCount = 0;
                         $employeeContractCount = 0;
                         $employeeDocCount = 0;
+                        $partnerCount = 0;
+                        $partnerDocCount = 0;
                     }
                 @endphp
 
@@ -346,7 +352,7 @@
                                         <i class="fa-solid fa-handshake text-white text-xl"></i>
                                     </div>
                                     <div class="text-right">
-                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">12</span>
+                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ $partnerCount }}</span>
                                         <p class="text-xs text-slate-500">partners</p>
                                     </div>
                                 </div>
@@ -355,7 +361,7 @@
                                 <div class="flex items-center gap-4 text-xs text-slate-500">
                                     <span class="flex items-center gap-1.5">
                                         <i class="fa-solid fa-file"></i>
-                                        48 documents
+                                        {{ $partnerDocCount }} documents
                                     </span>
                                 </div>
                             </div>
