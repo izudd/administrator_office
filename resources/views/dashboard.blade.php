@@ -61,6 +61,13 @@
                     <span x-show="!sidebarCollapsed" class="ml-3">Legal Karyawan</span>
                 </a>
 
+                <a href="{{ route('management-documents.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-amber-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-amber-500/30 group-hover:scale-110">
+                        <i class="fa-solid fa-user-tie text-sm"></i>
+                    </div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Legal Management</span>
+                </a>
+
                 <a href="{{ route('partner-documents.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
                     <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-purple-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-purple-500/30 group-hover:scale-110">
                         <i class="fa-solid fa-handshake text-sm"></i>
@@ -180,6 +187,9 @@
                         // Partner stats
                         $partnerCount = \App\Models\Partner::count();
                         $partnerDocCount = \App\Models\PartnerDocument::count();
+
+                        // Management stats
+                        $managementCount = \App\Models\ManagementProfile::count();
                     } catch (\Exception $e) {
                         $totalFolders = 0;
                         $totalDocuments = 0;
@@ -190,6 +200,7 @@
                         $employeeDocCount = 0;
                         $partnerCount = 0;
                         $partnerDocCount = 0;
+                        $managementCount = 0;
                     }
                 @endphp
 
@@ -367,6 +378,30 @@
                             </div>
                         </a>
 
+                        <!-- Legal Management -->
+                        <a href="{{ route('management-documents.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 transition-all hover:shadow-2xl hover:shadow-amber-500/10 overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-xl shadow-amber-500/30 group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-user-tie text-white text-xl"></i>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ $managementCount }}</span>
+                                        <p class="text-xs text-slate-500">pimpinan</p>
+                                    </div>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Legal Management</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Data & dokumen legal pimpinan KAP</p>
+                                <div class="flex items-center gap-4 text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="fa-solid fa-certificate"></i>
+                                        Izin AP, CPA, SKP
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+
                         <!-- Inventory -->
                         <a href="{{ route('inventory.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-teal-400 dark:hover:border-teal-500 transition-all hover:shadow-2xl hover:shadow-teal-500/10 overflow-hidden">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
@@ -501,6 +536,10 @@
                 <a href="{{ route('employee-documents.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
                     <i class="fa-solid fa-user-shield w-5"></i>
                     <span>Legal Karyawan</span>
+                </a>
+                <a href="{{ route('management-documents.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-user-tie w-5"></i>
+                    <span>Legal Management</span>
                 </a>
                 <a href="{{ route('inventory.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
                     <i class="fa-solid fa-boxes-stacked w-5"></i>

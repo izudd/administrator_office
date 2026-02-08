@@ -7,6 +7,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\PartnerDocumentController;
 use App\Http\Controllers\EmployeeLegalController;
 use App\Http\Controllers\EmployeeDocumentController;
+use App\Http\Controllers\ManagementDocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -133,6 +134,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/employee-documents/{employeeId}/upload', [EmployeeDocumentController::class, 'uploadFile'])->name('employee-documents.upload');
     Route::delete('/employee-documents/files/{fileId}', [EmployeeDocumentController::class, 'deleteFile'])->name('employee-documents.files.delete');
     Route::get('/employee-documents/preview/{fileId}', [EmployeeDocumentController::class, 'previewFile'])->name('employee-documents.preview');
+
+    // Management Documents (Legal Management) Routes
+    Route::get('/management-documents', [ManagementDocumentController::class, 'index'])->name('management-documents.index');
+    Route::post('/management-documents/profiles', [ManagementDocumentController::class, 'storeProfile'])->name('management-documents.profiles.store');
+    Route::put('/management-documents/profiles/{id}', [ManagementDocumentController::class, 'updateProfile'])->name('management-documents.profiles.update');
+    Route::delete('/management-documents/profiles/{id}', [ManagementDocumentController::class, 'destroyProfile'])->name('management-documents.profiles.destroy');
+    Route::get('/management-documents/{profileId}/files', [ManagementDocumentController::class, 'getFiles'])->name('management-documents.files');
+    Route::post('/management-documents/{profileId}/upload', [ManagementDocumentController::class, 'uploadFile'])->name('management-documents.upload');
+    Route::delete('/management-documents/files/{fileId}', [ManagementDocumentController::class, 'deleteFile'])->name('management-documents.files.delete');
+    Route::get('/management-documents/preview/{fileId}', [ManagementDocumentController::class, 'previewFile'])->name('management-documents.preview');
 });
 
 
