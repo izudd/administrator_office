@@ -1,10 +1,30 @@
 <x-app-layout>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <div x-data="{
             darkMode: localStorage.getItem('theme') === 'dark',
             sidebarCollapsed: false,
             mobileMenuOpen: false,
             currentTime: '',
             greeting: '',
+            // PIN Modal
+            pinModal: false,
+            pinTarget: '',
+            pinTargetName: '',
+            pinTargetUrl: '',
+            pinDigits: ['','','','','',''],
+            pinError: '',
+            pinLoading: false,
+            pinSuccess: false,
+            // Change PIN Modal
+            changePinModal: false,
+            changePinModule: '',
+            changePinModuleName: '',
+            currentPin: ['','','','','',''],
+            newPin: ['','','','','',''],
+            confirmPin: ['','','','','',''],
+            changePinStep: 1,
+            changePinError: '',
+            changePinLoading: false,
             initClock() {
                 const update = () => {
                     const now = new Date();
@@ -17,6 +37,138 @@
                 };
                 update();
                 setInterval(update, 1000);
+            },
+            openPin(moduleKey, moduleName, url) {
+                this.pinTarget = moduleKey;
+                this.pinTargetName = moduleName;
+                this.pinTargetUrl = url;
+                this.pinDigits = ['','','','','',''];
+                this.pinError = '';
+                this.pinSuccess = false;
+                this.pinLoading = false;
+                this.pinModal = true;
+                this.$nextTick(() => {
+                    const first = document.getElementById('pin-0');
+                    if (first) first.focus();
+                });
+            },
+            handlePinInput(index, event) {
+                const val = event.target.value.replace(/\D/g, '');
+                this.pinDigits[index] = val.slice(-1);
+                event.target.value = this.pinDigits[index];
+                if (val && index < 5) {
+                    const next = document.getElementById('pin-' + (index + 1));
+                    if (next) next.focus();
+                }
+                if (this.pinDigits.every(d => d !== '')) {
+                    this.verifyPin();
+                }
+            },
+            handlePinKeydown(index, event) {
+                if (event.key === 'Backspace' && !this.pinDigits[index] && index > 0) {
+                    const prev = document.getElementById('pin-' + (index - 1));
+                    if (prev) { this.pinDigits[index - 1] = ''; prev.value = ''; prev.focus(); }
+                }
+            },
+            handlePinPaste(event) {
+                event.preventDefault();
+                const text = (event.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+                for (let i = 0; i < 6; i++) { this.pinDigits[i] = text[i] || ''; }
+                this.$nextTick(() => {
+                    for (let i = 0; i < 6; i++) { const el = document.getElementById('pin-' + i); if (el) el.value = this.pinDigits[i]; }
+                    if (text.length === 6) this.verifyPin();
+                    else { const next = document.getElementById('pin-' + text.length); if (next) next.focus(); }
+                });
+            },
+            async verifyPin() {
+                this.pinLoading = true;
+                this.pinError = '';
+                try {
+                    const res = await fetch('/module-pin/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+                        body: JSON.stringify({ module_key: this.pinTarget, pin: this.pinDigits.join('') })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.pinSuccess = true;
+                        setTimeout(() => { window.location.href = this.pinTargetUrl; }, 600);
+                    } else {
+                        this.pinError = data.message;
+                        this.pinDigits = ['','','','','',''];
+                        this.$nextTick(() => {
+                            for (let i = 0; i < 6; i++) { const el = document.getElementById('pin-' + i); if (el) el.value = ''; }
+                            const first = document.getElementById('pin-0'); if (first) first.focus();
+                        });
+                    }
+                } catch (e) { this.pinError = 'Terjadi kesalahan, coba lagi'; }
+                this.pinLoading = false;
+            },
+            openChangePin(moduleKey, moduleName) {
+                this.changePinModule = moduleKey;
+                this.changePinModuleName = moduleName;
+                this.currentPin = ['','','','','',''];
+                this.newPin = ['','','','','',''];
+                this.confirmPin = ['','','','','',''];
+                this.changePinStep = 1;
+                this.changePinError = '';
+                this.changePinLoading = false;
+                this.changePinModal = true;
+                this.$nextTick(() => { const el = document.getElementById('cpin-0'); if (el) el.focus(); });
+            },
+            handleChangePinInput(prefix, arr, index, event, maxIndex) {
+                const val = event.target.value.replace(/\D/g, '');
+                this[arr][index] = val.slice(-1);
+                event.target.value = this[arr][index];
+                if (val && index < maxIndex) {
+                    const next = document.getElementById(prefix + (index + 1));
+                    if (next) next.focus();
+                }
+            },
+            handleChangePinKeydown(prefix, arr, index, event) {
+                if (event.key === 'Backspace' && !this[arr][index] && index > 0) {
+                    const prev = document.getElementById(prefix + (index - 1));
+                    if (prev) { this[arr][index - 1] = ''; prev.value = ''; prev.focus(); }
+                }
+            },
+            nextChangePinStep() {
+                if (this.changePinStep === 1 && this.currentPin.every(d => d !== '')) {
+                    this.changePinStep = 2;
+                    this.changePinError = '';
+                    this.$nextTick(() => { const el = document.getElementById('npin-0'); if (el) el.focus(); });
+                } else if (this.changePinStep === 2 && this.newPin.every(d => d !== '')) {
+                    this.changePinStep = 3;
+                    this.changePinError = '';
+                    this.$nextTick(() => { const el = document.getElementById('cfpin-0'); if (el) el.focus(); });
+                } else if (this.changePinStep === 3 && this.confirmPin.every(d => d !== '')) {
+                    this.submitChangePin();
+                }
+            },
+            async submitChangePin() {
+                if (this.newPin.join('') !== this.confirmPin.join('')) {
+                    this.changePinError = 'PIN baru tidak cocok!';
+                    this.confirmPin = ['','','','','',''];
+                    this.$nextTick(() => { for (let i=0;i<6;i++){const el=document.getElementById('cfpin-'+i);if(el)el.value='';} const el=document.getElementById('cfpin-0');if(el)el.focus(); });
+                    return;
+                }
+                this.changePinLoading = true;
+                this.changePinError = '';
+                try {
+                    const res = await fetch('/module-pin/change', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+                        body: JSON.stringify({ module_key: this.changePinModule, current_pin: this.currentPin.join(''), new_pin: this.newPin.join(''), confirm_pin: this.confirmPin.join('') })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.changePinModal = false;
+                        alert('PIN ' + this.changePinModuleName + ' berhasil diubah!');
+                    } else {
+                        this.changePinError = data.message;
+                        if (data.message.includes('lama')) { this.changePinStep = 1; this.currentPin = ['','','','','','']; this.$nextTick(() => { for(let i=0;i<6;i++){const el=document.getElementById('cpin-'+i);if(el)el.value='';} const el=document.getElementById('cpin-0');if(el)el.focus(); }); }
+                    }
+                } catch (e) { this.changePinError = 'Terjadi kesalahan'; }
+                this.changePinLoading = false;
             }
          }"
          x-init="$watch('darkMode', val => {
@@ -395,7 +547,8 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
                         <!-- Legal Documents -->
-                        <a href="{{ route('legal-documents.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition-all hover:shadow-2xl hover:shadow-blue-500/10 overflow-hidden">
+                        <div @click="openPin('legal-documents', 'Legal Documents', '{{ route('legal-documents.index') }}')" class="cursor-pointer group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition-all hover:shadow-2xl hover:shadow-blue-500/10 overflow-hidden">
+                            <div class="absolute top-3 right-3 z-10"><i class="fa-solid fa-lock text-slate-300 dark:text-slate-600 text-sm"></i></div>
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
                             <div class="relative">
                                 <div class="flex items-center justify-between mb-4">
@@ -409,17 +562,16 @@
                                 </div>
                                 <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Legal Documents</h3>
                                 <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Contracts, agreements, and legal files</p>
-                                <div class="flex items-center gap-4 text-xs text-slate-500">
-                                    <span class="flex items-center gap-1.5">
-                                        <i class="fa-solid fa-folder"></i>
-                                        {{ $totalFolders }} folders
-                                    </span>
+                                <div class="flex items-center justify-between text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-folder"></i> {{ $totalFolders }} folders</span>
+                                    <button @click.stop="openChangePin('legal-documents', 'Legal Documents')" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium flex items-center gap-1"><i class="fa-solid fa-key text-[10px]"></i> Ubah PIN</button>
                                 </div>
                             </div>
-                        </a>
+                        </div>
 
                         <!-- Kontrak Karyawan -->
-                        <a href="{{ route('employee-legal.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-cyan-400 dark:hover:border-cyan-500 transition-all hover:shadow-2xl hover:shadow-cyan-500/10 overflow-hidden">
+                        <div @click="openPin('employee-legal', 'Kontrak Karyawan', '{{ route('employee-legal.index') }}')" class="cursor-pointer group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-cyan-400 dark:hover:border-cyan-500 transition-all hover:shadow-2xl hover:shadow-cyan-500/10 overflow-hidden">
+                            <div class="absolute top-3 right-3 z-10"><i class="fa-solid fa-lock text-slate-300 dark:text-slate-600 text-sm"></i></div>
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
                             <div class="relative">
                                 <div class="flex items-center justify-between mb-4">
@@ -433,17 +585,16 @@
                                 </div>
                                 <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">Kontrak Karyawan</h3>
                                 <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">PKWT & PKWTT contract management</p>
-                                <div class="flex items-center gap-4 text-xs text-slate-500">
-                                    <span class="flex items-center gap-1.5">
-                                        <i class="fa-solid fa-file-contract"></i>
-                                        PKWT & PKWTT
-                                    </span>
+                                <div class="flex items-center justify-between text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-file-contract"></i> PKWT & PKWTT</span>
+                                    <button @click.stop="openChangePin('employee-legal', 'Kontrak Karyawan')" class="text-cyan-500 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 font-medium flex items-center gap-1"><i class="fa-solid fa-key text-[10px]"></i> Ubah PIN</button>
                                 </div>
                             </div>
-                        </a>
+                        </div>
 
                         <!-- Legal Karyawan -->
-                        <a href="{{ route('employee-documents.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-sky-400 dark:hover:border-sky-500 transition-all hover:shadow-2xl hover:shadow-sky-500/10 overflow-hidden">
+                        <div @click="openPin('employee-documents', 'Legal Karyawan', '{{ route('employee-documents.index') }}')" class="cursor-pointer group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-sky-400 dark:hover:border-sky-500 transition-all hover:shadow-2xl hover:shadow-sky-500/10 overflow-hidden">
+                            <div class="absolute top-3 right-3 z-10"><i class="fa-solid fa-lock text-slate-300 dark:text-slate-600 text-sm"></i></div>
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-sky-500/10 to-blue-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
                             <div class="relative">
                                 <div class="flex items-center justify-between mb-4">
@@ -457,17 +608,16 @@
                                 </div>
                                 <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Legal Karyawan</h3>
                                 <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Berkas legal & dokumen karyawan</p>
-                                <div class="flex items-center gap-4 text-xs text-slate-500">
-                                    <span class="flex items-center gap-1.5">
-                                        <i class="fa-solid fa-id-card"></i>
-                                        KTP, NPWP, BPJS
-                                    </span>
+                                <div class="flex items-center justify-between text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-id-card"></i> KTP, NPWP, BPJS</span>
+                                    <button @click.stop="openChangePin('employee-documents', 'Legal Karyawan')" class="text-sky-500 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300 font-medium flex items-center gap-1"><i class="fa-solid fa-key text-[10px]"></i> Ubah PIN</button>
                                 </div>
                             </div>
-                        </a>
+                        </div>
 
                         <!-- Partner Docs -->
-                        <a href="{{ route('partner-documents.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-purple-400 dark:hover:border-purple-500 transition-all hover:shadow-2xl hover:shadow-purple-500/10 overflow-hidden">
+                        <div @click="openPin('partner-documents', 'Partner Docs', '{{ route('partner-documents.index') }}')" class="cursor-pointer group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-purple-400 dark:hover:border-purple-500 transition-all hover:shadow-2xl hover:shadow-purple-500/10 overflow-hidden">
+                            <div class="absolute top-3 right-3 z-10"><i class="fa-solid fa-lock text-slate-300 dark:text-slate-600 text-sm"></i></div>
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
                             <div class="relative">
                                 <div class="flex items-center justify-between mb-4">
@@ -481,17 +631,16 @@
                                 </div>
                                 <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Partner Docs</h3>
                                 <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Partnership agreements and contracts</p>
-                                <div class="flex items-center gap-4 text-xs text-slate-500">
-                                    <span class="flex items-center gap-1.5">
-                                        <i class="fa-solid fa-file"></i>
-                                        {{ $partnerDocCount }} documents
-                                    </span>
+                                <div class="flex items-center justify-between text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-file"></i> {{ $partnerDocCount }} documents</span>
+                                    <button @click.stop="openChangePin('partner-documents', 'Partner Docs')" class="text-purple-500 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium flex items-center gap-1"><i class="fa-solid fa-key text-[10px]"></i> Ubah PIN</button>
                                 </div>
                             </div>
-                        </a>
+                        </div>
 
                         <!-- Legal Management -->
-                        <a href="{{ route('management-documents.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 transition-all hover:shadow-2xl hover:shadow-amber-500/10 overflow-hidden">
+                        <div @click="openPin('management-documents', 'Legal Management', '{{ route('management-documents.index') }}')" class="cursor-pointer group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 transition-all hover:shadow-2xl hover:shadow-amber-500/10 overflow-hidden">
+                            <div class="absolute top-3 right-3 z-10"><i class="fa-solid fa-lock text-slate-300 dark:text-slate-600 text-sm"></i></div>
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
                             <div class="relative">
                                 <div class="flex items-center justify-between mb-4">
@@ -505,17 +654,16 @@
                                 </div>
                                 <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Legal Management</h3>
                                 <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Data & dokumen legal pimpinan KAP</p>
-                                <div class="flex items-center gap-4 text-xs text-slate-500">
-                                    <span class="flex items-center gap-1.5">
-                                        <i class="fa-solid fa-certificate"></i>
-                                        Izin AP, CPA, SKP
-                                    </span>
+                                <div class="flex items-center justify-between text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-certificate"></i> Izin AP, CPA, SKP</span>
+                                    <button @click.stop="openChangePin('management-documents', 'Legal Management')" class="text-amber-500 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 font-medium flex items-center gap-1"><i class="fa-solid fa-key text-[10px]"></i> Ubah PIN</button>
                                 </div>
                             </div>
-                        </a>
+                        </div>
 
                         <!-- Inventory -->
-                        <a href="{{ route('inventory.index') }}" class="group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-teal-400 dark:hover:border-teal-500 transition-all hover:shadow-2xl hover:shadow-teal-500/10 overflow-hidden">
+                        <div @click="openPin('inventory', 'Inventory', '{{ route('inventory.index') }}')" class="cursor-pointer group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-teal-400 dark:hover:border-teal-500 transition-all hover:shadow-2xl hover:shadow-teal-500/10 overflow-hidden">
+                            <div class="absolute top-3 right-3 z-10"><i class="fa-solid fa-lock text-slate-300 dark:text-slate-600 text-sm"></i></div>
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
                             <div class="relative">
                                 <div class="flex items-center justify-between mb-4">
@@ -529,14 +677,12 @@
                                 </div>
                                 <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">Inventory</h3>
                                 <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Asset management and tracking</p>
-                                <div class="flex items-center gap-4 text-xs text-slate-500">
-                                    <span class="flex items-center gap-1.5">
-                                        <i class="fa-solid fa-chart-line"></i>
-                                        Real-time tracking
-                                    </span>
+                                <div class="flex items-center justify-between text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-chart-line"></i> Real-time tracking</span>
+                                    <button @click.stop="openChangePin('inventory', 'Inventory')" class="text-teal-500 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 font-medium flex items-center gap-1"><i class="fa-solid fa-key text-[10px]"></i> Ubah PIN</button>
                                 </div>
                             </div>
-                        </a>
+                        </div>
 
                     </div>
                 </div>
@@ -797,7 +943,161 @@
                 </form>
             </div>
         </aside>
+
+        <!-- PIN Verification Modal -->
+        <div x-show="pinModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="pinModal = false" style="display:none;">
+            <div x-show="pinModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90" class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md p-8 relative overflow-hidden">
+                <!-- Decorative -->
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500"></div>
+
+                <!-- Close -->
+                <button @click="pinModal = false" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-red-100 dark:hover:bg-red-500/20 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark text-slate-400 hover:text-red-500 text-sm"></i>
+                </button>
+
+                <!-- Icon -->
+                <div class="flex justify-center mb-6">
+                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center" :class="pinSuccess ? 'from-emerald-100 to-emerald-200 dark:from-emerald-500/20 dark:to-emerald-500/10' : ''">
+                        <i class="text-3xl" :class="pinSuccess ? 'fa-solid fa-lock-open text-emerald-500' : 'fa-solid fa-lock text-slate-400 dark:text-slate-500'"></i>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <h3 class="text-xl font-bold text-center text-slate-900 dark:text-white mb-2">Masukkan PIN</h3>
+                <p class="text-sm text-center text-slate-500 dark:text-slate-400 mb-8">Masukkan 6 digit PIN untuk akses <span class="font-semibold text-slate-700 dark:text-slate-300" x-text="pinTargetName"></span></p>
+
+                <!-- PIN Input (OTP Style) -->
+                <div class="flex justify-center gap-3 mb-6" @paste="handlePinPaste($event)">
+                    <template x-for="(digit, index) in pinDigits" :key="index">
+                        <input type="text" inputmode="numeric" maxlength="1"
+                            :id="'pin-' + index"
+                            :value="digit"
+                            @input="handlePinInput(index, $event)"
+                            @keydown="handlePinKeydown(index, $event)"
+                            @focus="$event.target.select()"
+                            class="w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 transition-all duration-200 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
+                            :class="pinError ? 'border-red-400 dark:border-red-500 animate-shake' : pinSuccess ? 'border-emerald-400 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20'"
+                            :disabled="pinLoading || pinSuccess">
+                    </template>
+                </div>
+
+                <!-- Error Message -->
+                <div x-show="pinError" x-transition class="text-center mb-4">
+                    <p class="text-sm text-red-500 dark:text-red-400 font-medium flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span x-text="pinError"></span>
+                    </p>
+                </div>
+
+                <!-- Success -->
+                <div x-show="pinSuccess" x-transition class="text-center mb-4">
+                    <p class="text-sm text-emerald-500 dark:text-emerald-400 font-medium flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i>
+                        PIN benar! Mengalihkan...
+                    </p>
+                </div>
+
+                <!-- Loading -->
+                <div x-show="pinLoading && !pinSuccess" class="flex justify-center mb-4">
+                    <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+
+                <!-- Info -->
+                <p class="text-xs text-center text-slate-400 dark:text-slate-500 mt-4">
+                    <i class="fa-solid fa-info-circle mr-1"></i>
+                    PIN default: 000000
+                </p>
+            </div>
+        </div>
+
+        <!-- Change PIN Modal -->
+        <div x-show="changePinModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="changePinModal = false" style="display:none;">
+            <div x-show="changePinModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100" class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md p-8 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500"></div>
+
+                <button @click="changePinModal = false" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-red-100 dark:hover:bg-red-500/20 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark text-slate-400 hover:text-red-500 text-sm"></i>
+                </button>
+
+                <div class="flex justify-center mb-4">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-500/20 dark:to-orange-500/10 flex items-center justify-center">
+                        <i class="fa-solid fa-key text-2xl text-amber-500"></i>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-bold text-center text-slate-900 dark:text-white mb-1">Ubah PIN</h3>
+                <p class="text-sm text-center text-slate-500 dark:text-slate-400 mb-2" x-text="changePinModuleName"></p>
+
+                <!-- Steps Indicator -->
+                <div class="flex items-center justify-center gap-2 mb-6">
+                    <template x-for="step in [1,2,3]" :key="step">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all" :class="changePinStep >= step ? 'bg-amber-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'">
+                                <span x-text="step"></span>
+                            </div>
+                            <div x-show="step < 3" class="w-8 h-0.5" :class="changePinStep > step ? 'bg-amber-500' : 'bg-slate-200 dark:bg-slate-700'"></div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Step 1: Current PIN -->
+                <div x-show="changePinStep === 1" x-transition>
+                    <p class="text-sm text-center text-slate-600 dark:text-slate-300 font-medium mb-4">Masukkan PIN Lama</p>
+                    <div class="flex justify-center gap-3 mb-4">
+                        <template x-for="i in 6" :key="'cp'+i">
+                            <input type="text" inputmode="numeric" maxlength="1" :id="'cpin-' + (i-1)" @input="handleChangePinInput('cpin-', 'currentPin', i-1, $event, 5)" @keydown="handleChangePinKeydown('cpin-', 'currentPin', i-1, $event)" @focus="$event.target.select()" class="w-11 h-13 text-center text-xl font-bold rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:border-amber-500 dark:focus:border-amber-400 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all">
+                        </template>
+                    </div>
+                    <div class="flex justify-center">
+                        <button @click="nextChangePinStep()" :disabled="!currentPin.every(d => d !== '')" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl font-medium transition-all disabled:cursor-not-allowed">Lanjut</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: New PIN -->
+                <div x-show="changePinStep === 2" x-transition>
+                    <p class="text-sm text-center text-slate-600 dark:text-slate-300 font-medium mb-4">Masukkan PIN Baru</p>
+                    <div class="flex justify-center gap-3 mb-4">
+                        <template x-for="i in 6" :key="'np'+i">
+                            <input type="text" inputmode="numeric" maxlength="1" :id="'npin-' + (i-1)" @input="handleChangePinInput('npin-', 'newPin', i-1, $event, 5)" @keydown="handleChangePinKeydown('npin-', 'newPin', i-1, $event)" @focus="$event.target.select()" class="w-11 h-13 text-center text-xl font-bold rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:border-amber-500 dark:focus:border-amber-400 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all">
+                        </template>
+                    </div>
+                    <div class="flex justify-center">
+                        <button @click="nextChangePinStep()" :disabled="!newPin.every(d => d !== '')" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl font-medium transition-all disabled:cursor-not-allowed">Lanjut</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Confirm PIN -->
+                <div x-show="changePinStep === 3" x-transition>
+                    <p class="text-sm text-center text-slate-600 dark:text-slate-300 font-medium mb-4">Konfirmasi PIN Baru</p>
+                    <div class="flex justify-center gap-3 mb-4">
+                        <template x-for="i in 6" :key="'cfp'+i">
+                            <input type="text" inputmode="numeric" maxlength="1" :id="'cfpin-' + (i-1)" @input="handleChangePinInput('cfpin-', 'confirmPin', i-1, $event, 5)" @keydown="handleChangePinKeydown('cfpin-', 'confirmPin', i-1, $event)" @focus="$event.target.select()" class="w-11 h-13 text-center text-xl font-bold rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:border-amber-500 dark:focus:border-amber-400 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all">
+                        </template>
+                    </div>
+                    <div class="flex justify-center">
+                        <button @click="nextChangePinStep()" :disabled="!confirmPin.every(d => d !== '') || changePinLoading" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl font-medium transition-all disabled:cursor-not-allowed flex items-center gap-2">
+                            <span x-show="changePinLoading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            <span>Simpan PIN</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error -->
+                <div x-show="changePinError" x-transition class="text-center mt-4">
+                    <p class="text-sm text-red-500 font-medium flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span x-text="changePinError"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Shake Animation -->
+    <style>
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
+    </style>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
