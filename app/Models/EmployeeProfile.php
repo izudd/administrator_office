@@ -11,7 +11,7 @@ class EmployeeProfile extends Model
 
     protected $fillable = [
         'employee_name', 'employee_id_number', 'position',
-        'department', 'email', 'phone', 'join_date', 'status',
+        'department', 'partner', 'email', 'phone', 'join_date', 'status',
     ];
 
     protected $casts = [

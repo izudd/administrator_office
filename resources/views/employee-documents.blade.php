@@ -148,6 +148,12 @@
                             <input type="text" x-model="searchQuery" placeholder="Cari nama karyawan, NIK, jabatan..."
                                    class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
                         </div>
+                        <select x-model="filterPartner" class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-sky-500">
+                            <option value="">Semua Partner</option>
+                            @foreach($partners as $p)
+                            <option value="{{ $p }}">{{ $p }}</option>
+                            @endforeach
+                        </select>
                         <select x-model="filterStatus" class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-sky-500">
                             <option value="">Semua Status</option>
                             <option value="active">Aktif</option>
@@ -160,7 +166,7 @@
                 <!-- Employee Cards Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 mb-8">
                     @forelse($employees as $emp)
-                    <div x-show="matchesFilter({{ json_encode(strtolower($emp->employee_name), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}, {{ json_encode(strtolower($emp->employee_id_number ?? ''), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}, {{ json_encode(strtolower($emp->position ?? ''), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}, {{ json_encode($emp->status, JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }})"
+                    <div x-show="matchesFilter({{ json_encode(strtolower($emp->employee_name), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}, {{ json_encode(strtolower($emp->employee_id_number ?? ''), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}, {{ json_encode(strtolower($emp->position ?? ''), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}, {{ json_encode($emp->status, JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}, {{ json_encode($emp->partner ?? '', JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }})"
                          class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-500/50 transition-all hover:shadow-xl overflow-hidden">
                         <!-- Card Header -->
                         <div class="relative p-5 pb-4">
@@ -174,6 +180,13 @@
                                     <p class="text-sm text-slate-500 dark:text-slate-400 truncate">{{ $emp->position ?? 'Belum diisi' }}</p>
                                     @if($emp->department)
                                     <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ $emp->department }}</p>
+                                    @endif
+                                    @if($emp->partner)
+                                    <p class="text-xs mt-1 flex items-center gap-1">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-md font-medium">
+                                            <i class="fa-solid fa-user-tie text-[10px]"></i>{{ $emp->partner }}
+                                        </span>
+                                    </p>
                                     @endif
                                 </div>
                                 @php
@@ -268,6 +281,15 @@
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Departemen</label>
                             <input type="text" x-model="empForm.department" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-sky-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Partner</label>
+                            <select x-model="empForm.partner" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-sky-500 text-sm">
+                                <option value="">Pilih Partner</option>
+                                @foreach($partners as $p)
+                                <option value="{{ $p }}">{{ $p }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email</label>
@@ -449,6 +471,7 @@
             sidebarCollapsed: false,
             searchQuery: '',
             filterStatus: '',
+            filterPartner: '',
             showAddEmployee: false,
             showFilesModal: false,
             showDeleteModal: false,
@@ -462,7 +485,7 @@
             deleteTargetId: null,
             deleteTargetName: '',
             toast: { show: false, message: '', type: 'success' },
-            empForm: { employee_name: '', employee_id_number: '', position: '', department: '', email: '', phone: '', join_date: '', status: 'active' },
+            empForm: { employee_name: '', employee_id_number: '', position: '', department: '', partner: '', email: '', phone: '', join_date: '', status: 'active' },
             uploadForm: { document_type: '', notes: '', expiry_date: '', file: null },
 
             init() {},
@@ -472,15 +495,16 @@
                 setTimeout(() => this.toast.show = false, 4000);
             },
 
-            matchesFilter(name, nik, pos, status) {
+            matchesFilter(name, nik, pos, status, partner) {
                 const q = this.searchQuery.toLowerCase();
                 const matchSearch = !q || name.includes(q) || nik.includes(q) || pos.includes(q);
                 const matchStatus = !this.filterStatus || status === this.filterStatus;
-                return matchSearch && matchStatus;
+                const matchPartner = !this.filterPartner || partner === this.filterPartner;
+                return matchSearch && matchStatus && matchPartner;
             },
 
             resetEmployeeForm() {
-                this.empForm = { employee_name: '', employee_id_number: '', position: '', department: '', email: '', phone: '', join_date: '', status: 'active' };
+                this.empForm = { employee_name: '', employee_id_number: '', position: '', department: '', partner: '', email: '', phone: '', join_date: '', status: 'active' };
                 this.editingEmployee = null;
             },
 
@@ -491,6 +515,7 @@
                     employee_id_number: emp.employee_id_number || '',
                     position: emp.position || '',
                     department: emp.department || '',
+                    partner: emp.partner || '',
                     email: emp.email || '',
                     phone: emp.phone || '',
                     join_date: emp.join_date ? emp.join_date.split('T')[0] : '',
