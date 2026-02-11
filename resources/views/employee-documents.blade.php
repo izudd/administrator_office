@@ -160,7 +160,7 @@
                 <!-- Employee Cards Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 mb-8">
                     @forelse($employees as $emp)
-                    <div x-show="matchesFilter('{{ strtolower($emp->employee_name) }}', '{{ strtolower($emp->employee_id_number ?? '') }}', '{{ strtolower($emp->position ?? '') }}', '{{ $emp->status }}')"
+                    <div x-show="matchesFilter({{ json_encode(strtolower($emp->employee_name), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}, {{ json_encode(strtolower($emp->employee_id_number ?? ''), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}, {{ json_encode(strtolower($emp->position ?? ''), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}, {{ json_encode($emp->status, JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }})"
                          class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-500/50 transition-all hover:shadow-xl overflow-hidden">
                         <!-- Card Header -->
                         <div class="relative p-5 pb-4">
@@ -207,13 +207,13 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5">
-                                <button @click="openEmployeeFiles({{ $emp->id }}, '{{ addslashes($emp->employee_name) }}')" class="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center transition-all hover:scale-110" title="Lihat Dokumen">
+                                <button @click="openEmployeeFiles({{ $emp->id }}, {{ json_encode($emp->employee_name, JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }})" class="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center transition-all hover:scale-110" title="Lihat Dokumen">
                                     <i class="fa-solid fa-folder-open text-sm"></i>
                                 </button>
-                                <button @click="editEmployee({{ json_encode($emp) }})" class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center transition-all hover:scale-110" title="Edit">
+                                <button @click="editEmployee(@json($emp))" class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center transition-all hover:scale-110" title="Edit">
                                     <i class="fa-solid fa-pen text-sm"></i>
                                 </button>
-                                <button @click="confirmDeleteEmployee({{ $emp->id }}, '{{ addslashes($emp->employee_name) }}')" class="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500 dark:text-red-400 flex items-center justify-center transition-all hover:scale-110" title="Hapus">
+                                <button @click="confirmDeleteEmployee({{ $emp->id }}, {{ json_encode($emp->employee_name, JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }})" class="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500 dark:text-red-400 flex items-center justify-center transition-all hover:scale-110" title="Hapus">
                                     <i class="fa-solid fa-trash text-sm"></i>
                                 </button>
                             </div>
@@ -551,7 +551,9 @@
                 this.showFilesModal = true;
                 this.uploadForm = { document_type: '', notes: '', expiry_date: '', file: null };
                 try {
-                    const res = await fetch(`/employee-documents/${id}/files`);
+                    const res = await fetch(`/employee-documents/${id}/files`, {
+                        headers: { 'Accept': 'application/json' },
+                    });
                     this.empFiles = await res.json();
                 } catch (e) { this.showToast('Gagal memuat dokumen', 'error'); }
                 this.loadingFiles = false;
@@ -575,7 +577,8 @@
                     if (data.success) {
                         this.showToast(data.message);
                         this.uploadForm = { document_type: '', notes: '', expiry_date: '', file: null };
-                        this.openEmployeeFiles(this.selectedEmployeeId, this.selectedEmployeeName);
+                        if (this.$refs.empFileInput) this.$refs.empFileInput.value = '';
+                        await this.openEmployeeFiles(this.selectedEmployeeId, this.selectedEmployeeName);
                     } else { this.showToast(data.message || 'Gagal upload', 'error'); }
                 } catch (e) { this.showToast('Terjadi kesalahan', 'error'); }
                 this.uploading = false;

@@ -7,6 +7,7 @@ use App\Models\EmployeeProfile;
 use App\Models\EmployeeFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class EmployeeDocumentController extends Controller
 {
@@ -100,7 +101,7 @@ class EmployeeDocumentController extends Controller
 
             // Delete all files from storage
             foreach ($employee->files as $file) {
-                Storage::delete('public/' . $file->file_path);
+                Storage::disk('public')->delete($file->file_path);
             }
 
             $employee->delete(); // cascade deletes files records
@@ -136,11 +137,18 @@ class EmployeeDocumentController extends Controller
         }
     }
 
+    // Allowed file extensions for employee documents
+    private const ALLOWED_EXTENSIONS = [
+        'pdf', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp',
+        'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
+        'txt', 'csv', 'zip', 'rar',
+    ];
+
     public function uploadFile(Request $request, $employeeId)
     {
         try {
             $request->validate([
-                'file' => 'required|file|max:10240',
+                'file' => 'required|file|max:10240|mimes:' . implode(',', self::ALLOWED_EXTENSIONS),
                 'document_type' => 'required|string|max:100',
                 'notes' => 'nullable|string|max:500',
                 'expiry_date' => 'nullable|date',
@@ -149,10 +157,18 @@ class EmployeeDocumentController extends Controller
             $employee = EmployeeProfile::findOrFail($employeeId);
             $file = $request->file('file');
 
-            $safeName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $employee->employee_name);
+            // Sanitize folder name from employee name
+            $safeFolderName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $employee->employee_name);
+
+            // Sanitize filename: keep original name but add unique suffix to prevent overwrite
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFileName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
+            $extension = strtolower($file->getClientOriginalExtension());
+            $uniqueName = $safeFileName . '_' . Str::random(8) . '.' . $extension;
+
             $path = $file->storeAs(
-                "employee-documents/{$safeName}",
-                $file->getClientOriginalName(),
+                "employee-documents/{$safeFolderName}",
+                $uniqueName,
                 'public'
             );
 
@@ -161,7 +177,7 @@ class EmployeeDocumentController extends Controller
                 'document_type' => $request->document_type,
                 'file_name' => $file->getClientOriginalName(),
                 'file_path' => $path,
-                'file_extension' => $file->getClientOriginalExtension(),
+                'file_extension' => $extension,
                 'notes' => $request->notes,
                 'expiry_date' => $request->expiry_date,
             ]);
@@ -172,7 +188,7 @@ class EmployeeDocumentController extends Controller
                 'file' => $doc,
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['success' => false, 'message' => 'Validasi gagal', 'errors' => $e->errors()], 422);
+            return response()->json(['success' => false, 'message' => 'Validasi gagal: ' . implode(', ', array_map(fn($e) => $e[0], $e->errors())), 'errors' => $e->errors()], 422);
         } catch (\Throwable $e) {
             Log::error('Upload file error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Gagal mengupload dokumen.'], 500);
@@ -183,7 +199,7 @@ class EmployeeDocumentController extends Controller
     {
         try {
             $file = EmployeeFile::findOrFail($fileId);
-            Storage::delete('public/' . $file->file_path);
+            Storage::disk('public')->delete($file->file_path);
             $file->delete();
 
             return response()->json(['success' => true, 'message' => 'Dokumen berhasil dihapus!']);

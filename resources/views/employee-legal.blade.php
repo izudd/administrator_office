@@ -100,12 +100,17 @@
             <!-- Top Bar -->
             <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
                 <div class="flex items-center justify-between px-4 lg:px-8 py-4">
-                    <div class="hidden sm:block">
-                        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Kontrak Karyawan</h1>
+                    <div class="flex items-center gap-3">
+                        <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors">
+                            <i class="fa-solid fa-bars text-lg"></i>
+                        </button>
+                        <div class="hidden sm:block">
+                            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Kontrak Karyawan</h1>
                         <p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
                             <i class="fa-solid fa-file-contract"></i>
                             Sistem Manajemen Kontrak Karyawan
                         </p>
+                        </div>
                     </div>
                     <div class="flex items-center gap-3">
                         <!-- Sub-Navigation Tabs -->
@@ -555,7 +560,7 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                                     @forelse($contracts as $contract)
-                                    <tr x-show="!searchQuery || '{{ strtolower($contract->employee_name) }}'.includes(searchQuery.toLowerCase()) || '{{ strtolower($contract->position) }}'.includes(searchQuery.toLowerCase())"
+                                    <tr x-show="!searchQuery || {{ json_encode(strtolower($contract->employee_name), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}.includes(searchQuery.toLowerCase()) || {{ json_encode(strtolower($contract->position), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }}.includes(searchQuery.toLowerCase())"
                                         class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                         <td class="px-6 py-4 text-sm text-slate-500">{{ $loop->iteration }}</td>
                                         <td class="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">{{ $contract->employee_name }}</td>
@@ -747,6 +752,63 @@
             </div>
         </div>
 
+        <!-- Mobile Sidebar Overlay -->
+        <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-40 lg:hidden" @click="mobileMenuOpen = false">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+            <div class="absolute left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white shadow-2xl overflow-y-auto"
+                 @click.stop x-transition:enter="transition ease-out duration-200" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+                 x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full">
+                <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <img src="{{ asset('images/logo.PNG') }}" alt="Logo" class="w-6 h-6 rounded-lg object-cover">
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-white text-sm">KAP Budiandru</h2>
+                            <p class="text-xs text-slate-400">Administrator</p>
+                        </div>
+                    </div>
+                    <button @click="mobileMenuOpen = false" class="p-2 hover:bg-slate-800 rounded-lg"><i class="fa-solid fa-xmark text-slate-400"></i></button>
+                </div>
+                <nav class="px-3 py-6 space-y-1">
+                    <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-gauge-high text-sm"></i></div>
+                        <span class="ml-3">Dashboard</span>
+                    </a>
+                    <a href="{{ route('legal-documents.index') }}" class="flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-scale-balanced text-sm"></i></div>
+                        <span class="ml-3">Legal Documents</span>
+                    </a>
+                    <a href="{{ route('employee-legal.index') }}" class="flex items-center px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 text-white font-medium">
+                        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg"><i class="fa-solid fa-file-signature text-sm text-white"></i></div>
+                        <span class="ml-3">Kontrak Karyawan</span>
+                    </a>
+                    <a href="{{ route('employee-documents.index') }}" class="flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-user-shield text-sm"></i></div>
+                        <span class="ml-3">Legal Karyawan</span>
+                    </a>
+                    <a href="{{ route('partner-documents.index') }}" class="flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-handshake text-sm"></i></div>
+                        <span class="ml-3">Partner Docs</span>
+                    </a>
+                    <a href="{{ route('inventory.index') }}" class="flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
+                        <div class="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-boxes-stacked text-sm"></i></div>
+                        <span class="ml-3">Inventory</span>
+                    </a>
+                </nav>
+                <div class="p-4 border-t border-slate-800">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="w-full px-4 py-2.5 text-sm bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 text-slate-300 rounded-lg transition-all font-medium flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-right-from-bracket"></i><span>Logout</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- Toast Notification -->
         <div x-show="toast.show" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="translate-y-4 opacity-0" x-transition:enter-end="translate-y-0 opacity-100"
              x-transition:leave="transition ease-in duration-200 transform" x-transition:leave-start="translate-y-0 opacity-100" x-transition:leave-end="translate-y-4 opacity-0"
@@ -770,6 +832,7 @@
     function employeeLegalApp() {
         return {
             sidebarCollapsed: false,
+            mobileMenuOpen: false,
             currentView: 'dashboard',
             searchQuery: '',
             saving: false,
