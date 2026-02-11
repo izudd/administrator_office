@@ -11,6 +11,19 @@ use Illuminate\Support\Str;
 
 class EmployeeDocumentController extends Controller
 {
+    // Daftar Partner KAP Budiandru
+    public const PARTNERS = [
+        'Prof. Dr. Budiandru',
+        'Dr. Otto Budiharjo',
+        'Dr. Burhan',
+        'Sigit Wijanarko',
+        'Drs. Moch Erfan',
+        'Karyanto',
+        'Sukarmin',
+        'Rudi Kurniawan',
+        'Dr. Hotbin Hasugian',
+    ];
+
     public function index()
     {
         $employees = EmployeeProfile::withCount('files')->orderBy('employee_name')->get();
@@ -31,9 +44,11 @@ class EmployeeDocumentController extends Controller
             'SKCK', 'Surat Referensi', 'Slip Gaji', 'SPT Pajak', 'Lainnya',
         ];
 
+        $partners = self::PARTNERS;
+
         return view('employee-documents', compact(
             'employees', 'totalEmployees', 'totalFiles',
-            'activeEmployees', 'expiringDocs', 'documentTypes'
+            'activeEmployees', 'expiringDocs', 'documentTypes', 'partners'
         ));
     }
 
@@ -45,6 +60,7 @@ class EmployeeDocumentController extends Controller
                 'employee_id_number' => 'nullable|string|max:50',
                 'position' => 'nullable|string|max:255',
                 'department' => 'nullable|string|max:255',
+                'partner' => 'nullable|string|max:255',
                 'email' => 'nullable|email|max:255',
                 'phone' => 'nullable|string|max:30',
                 'join_date' => 'nullable|date',
@@ -76,6 +92,7 @@ class EmployeeDocumentController extends Controller
                 'employee_id_number' => 'nullable|string|max:50',
                 'position' => 'nullable|string|max:255',
                 'department' => 'nullable|string|max:255',
+                'partner' => 'nullable|string|max:255',
                 'email' => 'nullable|email|max:255',
                 'phone' => 'nullable|string|max:30',
                 'join_date' => 'nullable|date',
