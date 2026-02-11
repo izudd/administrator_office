@@ -227,7 +227,7 @@
                                 <button @click="openEmployeeFiles({{ $emp->id }}, {{ json_encode($emp->employee_name, JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }})" class="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center transition-all hover:scale-110" title="Lihat Dokumen">
                                     <i class="fa-solid fa-folder-open text-sm"></i>
                                 </button>
-                                <button @click="editEmployee(@json($emp))" class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center transition-all hover:scale-110" title="Edit">
+                                <button @click="editEmployee({{ $emp->toJson() }})" class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center transition-all hover:scale-110" title="Edit">
                                     <i class="fa-solid fa-pen text-sm"></i>
                                 </button>
                                 <button @click="confirmDeleteEmployee({{ $emp->id }}, {{ json_encode($emp->employee_name, JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS) }})" class="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500 dark:text-red-400 flex items-center justify-center transition-all hover:scale-110" title="Hapus">
