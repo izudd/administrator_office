@@ -43,8 +43,12 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .folder-card:hover {
-            transform: translateY(-8px) scale(1.02);
+            transform: translateY(-4px) scale(1.01);
         }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 9999px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; }
     </style>
 
     <div style="--header-height:72px">
@@ -264,7 +268,7 @@
                             <div
                                 style="animation-delay: {{ $index * 60 }}ms"
                                 class="folder-card group relative glass-card rounded-2xl overflow-hidden animate-[fadeIn_0.5s_ease-out_forwards] opacity-0"
-                                :class="viewMode === 'list' ? 'flex items-center p-4' : 'p-6'"
+                                :class="viewMode === 'list' ? 'p-4' : 'p-6'"
                             >
                                 <!-- Hover Gradient -->
                                 <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-teal-500/0 to-cyan-500/0 group-hover:from-emerald-500/5 group-hover:via-teal-500/5 group-hover:to-cyan-500/5 transition-all duration-500"></div>
@@ -283,20 +287,19 @@
                                     </button>
                                 </div>
 
-                                <div @click="openFolder('{{ addslashes($folder->name) }}', $event)"
-                                    class="relative z-10 cursor-pointer"
-                                    :class="viewMode === 'list' ? 'flex items-center gap-4 flex-1' : ''">
+                                <div class="relative z-10"
+                                    :class="viewMode === 'list' ? 'flex items-center gap-4' : ''">
 
                                     <!-- Folder Icon -->
-                                    <div class="relative" :class="viewMode === 'list' ? '' : 'mb-5'">
+                                    <div class="relative cursor-pointer" :class="viewMode === 'list' ? '' : 'mb-5'" @click="toggleToc('{{ addslashes($folder->name) }}')">
                                         <div class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-2xl blur-lg opacity-0 group-hover:opacity-40 transition-opacity"></div>
                                         <div class="relative w-16 h-16 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                                            <i class="fa-solid fa-folder-open text-2xl text-white"></i>
+                                            <i class="text-2xl text-white" :class="tocExpanded['{{ addslashes($folder->name) }}'] ? 'fa-solid fa-folder-open' : 'fa-solid fa-folder'"></i>
                                         </div>
                                     </div>
 
                                     <!-- Folder Info -->
-                                    <div :class="viewMode === 'list' ? 'flex-1' : ''">
+                                    <div :class="viewMode === 'list' ? 'flex-1' : ''" class="cursor-pointer" @click="toggleToc('{{ addslashes($folder->name) }}')">
                                         <h3 class="text-lg font-bold text-gray-800 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate"
                                             :class="viewMode === 'list' ? '' : 'mb-3'">
                                             {{ $folder->name }}
@@ -313,22 +316,102 @@
                                         </div>
                                     </div>
 
-                                    <!-- Arrow (List View) -->
-                                    <div x-show="viewMode === 'list'" class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all text-emerald-500">
-                                        <span class="text-sm font-medium">Open</span>
-                                        <i class="fa-solid fa-arrow-right"></i>
+                                    <!-- Toggle & Open Buttons -->
+                                    <div class="flex items-center gap-2" :class="viewMode === 'list' ? '' : 'hidden'">
+                                        <button @click.stop="toggleToc('{{ addslashes($folder->name) }}')"
+                                            class="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center justify-center transition-all"
+                                            title="Daftar Isi">
+                                            <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300" :class="tocExpanded['{{ addslashes($folder->name) }}'] ? 'rotate-180' : ''"></i>
+                                        </button>
+                                        <button @click.stop="openFolder('{{ addslashes($folder->name) }}')"
+                                            class="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-all"
+                                            title="Open & Upload">
+                                            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                        </button>
                                     </div>
                                 </div>
 
                                 <!-- Footer (Grid View) -->
                                 <div x-show="viewMode === 'grid'" class="relative z-10 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between">
-                                    <span class="px-3 py-1 text-[10px] font-bold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 uppercase">
-                                        Active
+                                    <span class="px-3 py-1 text-[10px] font-bold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 uppercase flex items-center gap-1.5">
+                                        <i class="fa-solid fa-list-ul text-[8px]"></i>
+                                        <span x-text="tocFiles['{{ addslashes($folder->name) }}'] ? tocFiles['{{ addslashes($folder->name) }}'].length + ' files' : 'Daftar Isi'"></span>
                                     </span>
-                                    <div class="flex items-center gap-2 text-emerald-500 opacity-0 group-hover:opacity-100 transition-all">
-                                        <span class="text-xs font-medium">View Files</span>
-                                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                                    <div class="flex items-center gap-2">
+                                        <button @click.stop="toggleToc('{{ addslashes($folder->name) }}')"
+                                            class="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg transition-all"
+                                            :class="tocExpanded['{{ addslashes($folder->name) }}'] ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' : 'text-gray-400 hover:text-emerald-500'">
+                                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" :class="tocExpanded['{{ addslashes($folder->name) }}'] ? 'rotate-180' : ''"></i>
+                                            <span x-text="tocExpanded['{{ addslashes($folder->name) }}'] ? 'Tutup' : 'Lihat Isi'"></span>
+                                        </button>
+                                        <button @click.stop="openFolder('{{ addslashes($folder->name) }}')"
+                                            class="flex items-center gap-1.5 text-xs font-medium text-emerald-500 hover:text-emerald-600 transition-all opacity-0 group-hover:opacity-100">
+                                            <span>Open</span>
+                                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                        </button>
                                     </div>
+                                </div>
+
+                                <!-- TOC: Daftar Isi (Expand/Collapse) -->
+                                <div x-show="tocExpanded['{{ addslashes($folder->name) }}']"
+                                    x-transition:enter="transition ease-out duration-300"
+                                    x-transition:enter-start="opacity-0 -translate-y-2 max-h-0"
+                                    x-transition:enter-end="opacity-100 translate-y-0 max-h-[500px]"
+                                    x-transition:leave="transition ease-in duration-200"
+                                    x-transition:leave-start="opacity-100 translate-y-0"
+                                    x-transition:leave-end="opacity-0 -translate-y-2"
+                                    class="relative z-10 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/50">
+
+                                    <!-- Loading -->
+                                    <template x-if="tocLoading['{{ addslashes($folder->name) }}']">
+                                        <div class="space-y-2 py-2">
+                                            <template x-for="i in 3" :key="i">
+                                                <div class="flex items-center gap-3 p-2 rounded-lg animate-pulse">
+                                                    <div class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+                                                    <div class="flex-1 space-y-1">
+                                                        <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                                                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- File List -->
+                                    <template x-if="!tocLoading['{{ addslashes($folder->name) }}'] && tocFiles['{{ addslashes($folder->name) }}'] && tocFiles['{{ addslashes($folder->name) }}'].length > 0">
+                                        <div class="space-y-1 max-h-[300px] overflow-y-auto custom-scrollbar">
+                                            <template x-for="(f, idx) in tocFiles['{{ addslashes($folder->name) }}']" :key="idx">
+                                                <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer group/file"
+                                                    @click.stop="tocPreviewFile('{{ addslashes($folder->name) }}', f.file_name)">
+                                                    <!-- Mini File Icon -->
+                                                    <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs"
+                                                        :class="getFileIconClass(f.file_name)">
+                                                        <i :class="getFileIcon(f.file_name)"></i>
+                                                    </div>
+                                                    <!-- File Name + Size -->
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-xs font-medium text-gray-700 dark:text-gray-300 truncate group-hover/file:text-emerald-600 dark:group-hover/file:text-emerald-400 transition-colors" x-text="f.file_name"></p>
+                                                        <p class="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                                                            <span x-text="f.size || 'N/A'"></span>
+                                                            <span class="uppercase" x-text="f.file_name.split('.').pop()"></span>
+                                                        </p>
+                                                    </div>
+                                                    <!-- Quick Preview Icon -->
+                                                    <div class="flex-shrink-0 opacity-0 group-hover/file:opacity-100 transition-opacity">
+                                                        <i class="fa-solid fa-eye text-[10px] text-gray-400"></i>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- Empty -->
+                                    <template x-if="!tocLoading['{{ addslashes($folder->name) }}'] && tocFiles['{{ addslashes($folder->name) }}'] && tocFiles['{{ addslashes($folder->name) }}'].length === 0">
+                                        <div class="py-4 text-center">
+                                            <i class="fa-solid fa-folder-open text-2xl text-gray-300 dark:text-gray-600 mb-2"></i>
+                                            <p class="text-xs text-gray-400 dark:text-gray-500">Belum ada file</p>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         @endforeach
@@ -759,6 +842,9 @@
                 previewUrl: '',
                 previewTitle: '',
                 previewType: 'unknown',
+                tocExpanded: {},
+                tocFiles: {},
+                tocLoading: {},
                 toast: {
                     show: false,
                     type: 'success',
@@ -773,6 +859,62 @@
                 showToast(type, title, message) {
                     this.toast = { show: true, type, title, message };
                     setTimeout(() => { this.toast.show = false; }, 4000);
+                },
+
+                async toggleToc(folderName) {
+                    if (this.tocExpanded[folderName]) {
+                        this.tocExpanded[folderName] = false;
+                        return;
+                    }
+
+                    this.tocExpanded[folderName] = true;
+
+                    // Only fetch if not already loaded
+                    if (!this.tocFiles[folderName]) {
+                        this.tocLoading[folderName] = true;
+                        try {
+                            const encoded = encodeURIComponent(folderName);
+                            const res = await fetch(`/legal-documents/${encoded}/files`, {
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                credentials: 'same-origin'
+                            });
+
+                            if (res.ok) {
+                                const data = await res.json();
+                                this.tocFiles[folderName] = data.map(f => ({
+                                    ...f,
+                                    url: f.url || (f.file_path ? `/storage/${f.file_path}` : undefined)
+                                }));
+                            } else {
+                                this.tocFiles[folderName] = [];
+                                if (res.status === 403) {
+                                    this.showToast('error', 'Akses Ditolak', 'PIN diperlukan untuk mengakses folder ini');
+                                    this.tocExpanded[folderName] = false;
+                                }
+                            }
+                        } catch (err) {
+                            console.error('TOC fetch error:', err);
+                            this.tocFiles[folderName] = [];
+                        } finally {
+                            this.tocLoading[folderName] = false;
+                        }
+                    }
+                },
+
+                tocPreviewFile(folderName, fileName) {
+                    this.previewTitle = fileName;
+                    const ext = fileName.split('.').pop().toLowerCase();
+                    this.previewUrl = `/legal-documents/${encodeURIComponent(folderName)}/preview/${encodeURIComponent(fileName)}`;
+
+                    if (['pdf'].includes(ext)) this.previewType = 'pdf';
+                    else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) this.previewType = 'image';
+                    else if (['txt', 'csv'].includes(ext)) this.previewType = 'text';
+                    else this.previewType = 'unknown';
+
+                    this.showPreview = true;
                 },
 
                 async openFolder(folderName, evt = null) {
@@ -924,6 +1066,8 @@
                         this.uploading = false;
                         if (xhr.status === 200 || xhr.status === 201) {
                             this.showToast('success', 'Success!', `${file.name} uploaded`);
+                            // Invalidate TOC cache so it refetches
+                            delete this.tocFiles[this.selectedFolder];
                             await this.loadFiles(this.selectedFolder);
                         } else {
                             let msg = 'Upload failed';
@@ -964,6 +1108,8 @@
 
                         if (res.ok) {
                             this.files = this.files.filter(f => f.file_name !== fileName);
+                            // Invalidate TOC cache
+                            delete this.tocFiles[this.selectedFolder];
                             this.showToast('success', 'Deleted!', `${fileName} has been deleted`);
                         } else {
                             const j = await res.json().catch(() => null);
