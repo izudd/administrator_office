@@ -1,251 +1,189 @@
-<!DOCTYPE html>
-<html lang="id" x-data="suratApp()" x-init="init()">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<x-app-layout>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Surat Menyurat — KAP Budiandru & Rekan</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>
-        [x-cloak] { display: none !important; }
 
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    <div x-data="suratApp()" x-init="init()" class="min-h-screen flex bg-slate-100 dark:bg-slate-950 transition-colors duration-300">
 
-        .sidebar-link {
-            @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors;
-        }
-        .sidebar-link.active {
-            @apply bg-slate-900 text-white hover:bg-slate-800 hover:text-white;
-        }
-
-        /* Badge jenis surat */
-        .badge-masuk    { background: #dbeafe; color: #1d4ed8; }
-        .badge-keluar   { background: #dcfce7; color: #15803d; }
-        .badge-internal { background: #fef9c3; color: #a16207; }
-        .badge-sk       { background: #ede9fe; color: #7c3aed; }
-
-        /* Badge status */
-        .status-draft      { background: #f1f5f9; color: #64748b; }
-        .status-terkirim   { background: #dbeafe; color: #1d4ed8; }
-        .status-diterima   { background: #dcfce7; color: #15803d; }
-        .status-dibalas    { background: #fef9c3; color: #a16207; }
-        .status-diarsipkan { background: #e2e8f0; color: #475569; }
-
-        /* Table row hover */
-        .table-row:hover { background-color: #f8fafc; }
-
-        /* Modal backdrop */
-        .modal-backdrop {
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(2px);
-        }
-
-        /* Drag & drop zone */
-        .drop-zone { border: 2px dashed #cbd5e1; transition: all 0.2s; }
-        .drop-zone.active { border-color: #3b82f6; background: #eff6ff; }
-
-        /* Toast */
-        .toast-enter { animation: toastIn 0.3s ease-out; }
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateY(16px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-
-        /* Print */
-        @media print {
-            .no-print { display: none !important; }
-            .print-full { width: 100% !important; }
-        }
-    </style>
-</head>
-<body class="bg-slate-50 min-h-screen">
-
-{{-- ===================== TOAST ===================== --}}
-<div class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 no-print" x-cloak>
-    <template x-for="toast in toasts" :key="toast.id">
-        <div class="toast-enter flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-sm font-medium max-w-xs"
-             :class="toast.type === 'success' ? 'bg-white border border-green-200 text-green-800' : 'bg-white border border-red-200 text-red-800'">
-            <span x-show="toast.type === 'success'" class="text-green-500 flex-shrink-0">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-            </span>
-            <span x-show="toast.type === 'error'" class="text-red-500 flex-shrink-0">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
-            </span>
-            <span x-text="toast.message"></span>
-        </div>
-    </template>
-</div>
-
-{{-- ===================== LAYOUT ===================== --}}
-<div class="flex h-screen overflow-hidden">
-
-    {{-- ===== SIDEBAR ===== --}}
-    <aside class="no-print flex flex-col w-64 flex-shrink-0 bg-white border-r border-slate-200 h-full">
-        {{-- Logo --}}
-        <div class="flex items-center gap-3 px-5 py-5 border-b border-slate-100">
-            <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-            </div>
-            <div>
-                <p class="text-xs font-bold text-slate-900 leading-tight">KAP Budiandru</p>
-                <p class="text-[10px] text-slate-400 leading-tight">& Rekan</p>
-            </div>
-        </div>
-
-        {{-- Nav --}}
-        <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-            <p class="px-3 mb-2 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Menu Utama</p>
-            <a href="{{ route('dashboard') }}" class="sidebar-link">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
-                Dashboard
-            </a>
-            <a href="{{ route('legal-documents.index') }}" class="sidebar-link">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Dokumen Legal
-            </a>
-            <a href="{{ route('inventory.index') }}" class="sidebar-link">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                Inventaris
-            </a>
-            <a href="{{ route('partner-documents.index') }}" class="sidebar-link">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                Dokumen Partner
-            </a>
-            <a href="{{ route('employee-legal.index') }}" class="sidebar-link">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                Kontrak Karyawan
-            </a>
-            <a href="{{ route('employee-documents.index') }}" class="sidebar-link">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                Legal Karyawan
-            </a>
-            <a href="{{ route('management-documents.index') }}" class="sidebar-link">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                Legal Management
-            </a>
-            <a href="{{ route('surat-menyurat.index') }}" class="sidebar-link active">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                Surat Menyurat
-            </a>
-        </nav>
-
-        {{-- User --}}
-        <div class="border-t border-slate-100 px-4 py-3">
-            <div class="flex items-center gap-3">
-                <div class="w-7 h-7 bg-slate-200 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg class="w-3.5 h-3.5 text-slate-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+        <!-- ===== SIDEBAR ===== -->
+        <aside :class="sidebarCollapsed ? 'w-20' : 'w-72'"
+               class="hidden lg:flex flex-col bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white border-r border-slate-800 transition-all duration-300 ease-in-out">
+            <div class="p-5 border-b border-slate-800">
+                <div class="flex items-center" :class="sidebarCollapsed ? 'justify-center' : 'space-x-3'">
+                    <div class="relative group">
+                        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                        <div class="relative w-11 h-11 bg-gradient-to-br from-emerald-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <img src="{{ asset('images/logo.PNG') }}" alt="Logo" class="w-7 h-7 rounded-lg object-cover">
+                        </div>
+                    </div>
+                    <div x-show="!sidebarCollapsed" x-transition class="overflow-hidden">
+                        <h2 class="font-bold text-white text-sm">KAP Budiandru</h2>
+                        <p class="text-xs text-slate-400">Administrator</p>
+                    </div>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs font-medium text-slate-700 truncate">{{ auth()->user()->name }}</p>
-                    <p class="text-[10px] text-slate-400 truncate">{{ auth()->user()->email }}</p>
-                </div>
-                <a href="{{ route('profile.edit') }}" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+
+            <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+                <p x-show="!sidebarCollapsed" class="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Overview</p>
+                <a href="{{ route('dashboard') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-emerald-500 flex items-center justify-center transition-all"><i class="fa-solid fa-gauge-high text-sm"></i></div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Dashboard</span>
                 </a>
+                <p x-show="!sidebarCollapsed" class="px-4 py-2 mt-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Documents</p>
+                <a href="{{ route('legal-documents.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-blue-500 flex items-center justify-center transition-all"><i class="fa-solid fa-scale-balanced text-sm"></i></div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Legal Documents</span>
+                </a>
+                <a href="{{ route('employee-legal.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-cyan-500 flex items-center justify-center transition-all"><i class="fa-solid fa-file-signature text-sm"></i></div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Kontrak Karyawan</span>
+                </a>
+                <a href="{{ route('employee-documents.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-sky-500 flex items-center justify-center transition-all"><i class="fa-solid fa-user-shield text-sm"></i></div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Legal Karyawan</span>
+                </a>
+                <a href="{{ route('management-documents.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-amber-500 flex items-center justify-center transition-all"><i class="fa-solid fa-user-tie text-sm"></i></div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Legal Management</span>
+                </a>
+                <a href="{{ route('partner-documents.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-purple-500 flex items-center justify-center transition-all"><i class="fa-solid fa-handshake text-sm"></i></div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Partner Docs</span>
+                </a>
+                <p x-show="!sidebarCollapsed" class="px-4 py-2 mt-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Management</p>
+                <a href="{{ route('inventory.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-teal-500 flex items-center justify-center transition-all"><i class="fa-solid fa-boxes-stacked text-sm"></i></div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Inventory</span>
+                </a>
+                <a href="{{ route('surat-menyurat.index') }}" class="group flex items-center px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 text-white font-medium transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg shadow-rose-500/30"><i class="fa-solid fa-envelope-open-text text-sm text-white"></i></div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Surat Menyurat</span>
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-slate-800">
+                <div class="bg-slate-800/50 rounded-xl p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                            <span class="text-sm font-bold text-white">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                        </div>
+                        <div x-show="!sidebarCollapsed" class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-white truncate">{{ Auth::user()->name }}</p>
+                            <p class="text-xs text-slate-400 truncate">{{ Auth::user()->email }}</p>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ route('logout') }}" x-show="!sidebarCollapsed" class="mt-3">
+                        @csrf
+                        <button type="submit" class="w-full px-4 py-2.5 text-sm bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 text-slate-300 rounded-lg transition-all font-medium flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-right-from-bracket"></i><span>Logout</span>
+                        </button>
+                    </form>
+                </div>
+                <button @click="sidebarCollapsed = !sidebarCollapsed" class="hidden lg:flex w-full mt-3 items-center justify-center gap-2 px-4 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all">
+                    <i class="fa-solid" :class="sidebarCollapsed ? 'fa-angles-right' : 'fa-angles-left'"></i>
+                    <span x-show="!sidebarCollapsed">Collapse</span>
+                </button>
             </div>
-        </div>
-    </aside>
+        </aside>
 
-    {{-- ===== MAIN CONTENT ===== --}}
-    <main class="flex-1 flex flex-col overflow-hidden">
+        <!-- ===== MAIN CONTENT ===== -->
+        <main class="flex-1 flex flex-col overflow-hidden">
 
-        {{-- ---- HEADER ---- --}}
-        <header class="no-print bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
-            <div>
-                <h1 class="text-lg font-semibold text-slate-900">Surat Menyurat</h1>
-                <p class="text-xs text-slate-400 mt-0.5">Kelola surat masuk, keluar, internal, dan surat keputusan</p>
-            </div>
-            <button @click="openModal('add')"
-                    class="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Tambah Surat
-            </button>
-        </header>
+            <!-- Top Bar -->
+            <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center justify-between px-4 lg:px-8 py-4">
+                    <div class="hidden sm:block">
+                        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Surat Menyurat</h1>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                            Kelola surat masuk, keluar, internal, dan surat keputusan
+                        </p>
+                    </div>
+                    <button @click="openModal('add')"
+                            class="px-5 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-xl font-semibold text-sm shadow-lg shadow-rose-500/30 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i>
+                        Tambah Surat
+                    </button>
+                </div>
+            </header>
 
-        {{-- ---- BODY ---- --}}
-        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+            <!-- Page Content -->
+            <div class="flex-1 overflow-y-auto p-4 lg:p-8">
 
-            {{-- Stats Cards --}}
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white rounded-xl border border-slate-200 p-4 cursor-pointer transition-shadow hover:shadow-sm"
-                     @click="filterJenis = filterJenis === 'masuk' ? '' : 'masuk'">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-medium text-slate-500">Surat Masuk</span>
-                        <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+                    <!-- Surat Masuk -->
+                    <div @click="filterJenis = filterJenis === 'masuk' ? '' : 'masuk'"
+                         class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-500/50 transition-all hover:shadow-xl overflow-hidden cursor-pointer"
+                         :class="filterJenis === 'masuk' ? 'border-blue-400 dark:border-blue-500 shadow-xl' : ''">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform mb-3">
+                                <i class="fa-solid fa-envelope text-white text-lg"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ $totalMasuk }}</div>
+                            <div class="text-sm text-slate-500 dark:text-slate-400">Surat Masuk</div>
                         </div>
                     </div>
-                    <p class="text-2xl font-bold text-slate-900">{{ $totalMasuk }}</p>
-                    <p class="text-xs text-slate-400 mt-1">surat diterima</p>
-                </div>
-                <div class="bg-white rounded-xl border border-slate-200 p-4 cursor-pointer transition-shadow hover:shadow-sm"
-                     @click="filterJenis = filterJenis === 'keluar' ? '' : 'keluar'">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-medium text-slate-500">Surat Keluar</span>
-                        <div class="w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                    <!-- Surat Keluar -->
+                    <div @click="filterJenis = filterJenis === 'keluar' ? '' : 'keluar'"
+                         class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-500/50 transition-all hover:shadow-xl overflow-hidden cursor-pointer"
+                         :class="filterJenis === 'keluar' ? 'border-emerald-400 dark:border-emerald-500 shadow-xl' : ''">
+                        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform mb-3">
+                                <i class="fa-solid fa-paper-plane text-white text-lg"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ $totalKeluar }}</div>
+                            <div class="text-sm text-slate-500 dark:text-slate-400">Surat Keluar</div>
                         </div>
                     </div>
-                    <p class="text-2xl font-bold text-slate-900">{{ $totalKeluar }}</p>
-                    <p class="text-xs text-slate-400 mt-1">surat dikirim</p>
-                </div>
-                <div class="bg-white rounded-xl border border-slate-200 p-4 cursor-pointer transition-shadow hover:shadow-sm"
-                     @click="filterJenis = filterJenis === 'internal' ? '' : 'internal'">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-medium text-slate-500">Internal</span>
-                        <div class="w-7 h-7 rounded-lg bg-yellow-50 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <!-- Internal -->
+                    <div @click="filterJenis = filterJenis === 'internal' ? '' : 'internal'"
+                         class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 hover:border-amber-300 dark:hover:border-amber-500/50 transition-all hover:shadow-xl overflow-hidden cursor-pointer"
+                         :class="filterJenis === 'internal' ? 'border-amber-400 dark:border-amber-500 shadow-xl' : ''">
+                        <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform mb-3">
+                                <i class="fa-solid fa-comments text-white text-lg"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ $totalInternal }}</div>
+                            <div class="text-sm text-slate-500 dark:text-slate-400">Internal / Memo</div>
                         </div>
                     </div>
-                    <p class="text-2xl font-bold text-slate-900">{{ $totalInternal }}</p>
-                    <p class="text-xs text-slate-400 mt-1">memo internal</p>
-                </div>
-                <div class="bg-white rounded-xl border border-slate-200 p-4 cursor-pointer transition-shadow hover:shadow-sm"
-                     @click="filterJenis = filterJenis === 'sk' ? '' : 'sk'">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-medium text-slate-500">Surat Keputusan</span>
-                        <div class="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                    <!-- SK -->
+                    <div @click="filterJenis = filterJenis === 'sk' ? '' : 'sk'"
+                         class="group relative bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 hover:border-purple-300 dark:hover:border-purple-500/50 transition-all hover:shadow-xl overflow-hidden cursor-pointer"
+                         :class="filterJenis === 'sk' ? 'border-purple-400 dark:border-purple-500 shadow-xl' : ''">
+                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform mb-3">
+                                <i class="fa-solid fa-certificate text-white text-lg"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ $totalSK }}</div>
+                            <div class="text-sm text-slate-500 dark:text-slate-400">Surat Keputusan</div>
                         </div>
                     </div>
-                    <p class="text-2xl font-bold text-slate-900">{{ $totalSK }}</p>
-                    <p class="text-xs text-slate-400 mt-1">SK diterbitkan</p>
                 </div>
-            </div>
 
-            {{-- Table Card --}}
-            <div class="bg-white rounded-xl border border-slate-200">
-                {{-- Table Toolbar --}}
-                <div class="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center gap-3">
-                    {{-- Search --}}
-                    <div class="relative flex-1 max-w-sm">
-                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <input type="text" x-model="search" placeholder="Cari nomor, perihal, instansi..."
-                               class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 bg-slate-50">
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        {{-- Filter Jenis --}}
+                <!-- Search & Filter Bar -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 mb-6">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input type="text" x-model="search"
+                                   placeholder="Cari nomor surat, perihal, instansi, pengirim..."
+                                   class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all">
+                        </div>
                         <select x-model="filterJenis"
-                                class="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 text-slate-700">
+                                class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-rose-500">
                             <option value="">Semua Jenis</option>
                             <option value="masuk">Surat Masuk</option>
                             <option value="keluar">Surat Keluar</option>
-                            <option value="internal">Internal</option>
+                            <option value="internal">Internal / Memo</option>
                             <option value="sk">Surat Keputusan</option>
                         </select>
-
-                        {{-- Filter Status --}}
                         <select x-model="filterStatus"
-                                class="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 text-slate-700">
+                                class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-rose-500">
                             <option value="">Semua Status</option>
                             <option value="draft">Draft</option>
                             <option value="terkirim">Terkirim</option>
@@ -253,145 +191,177 @@
                             <option value="dibalas">Dibalas</option>
                             <option value="diarsipkan">Diarsipkan</option>
                         </select>
-
-                        {{-- Clear Filter --}}
-                        <button x-show="search || filterJenis || filterStatus" x-cloak
+                        <button x-show="search || filterJenis || filterStatus"
                                 @click="search = ''; filterJenis = ''; filterStatus = ''"
-                                class="text-xs text-slate-500 hover:text-slate-700 px-2 py-2 rounded-lg hover:bg-slate-100 transition-colors whitespace-nowrap">
-                            Reset
+                                class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-xmark"></i> Reset
                         </button>
                     </div>
                 </div>
 
-                {{-- Table --}}
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-slate-100">
-                                <th class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wide px-5 py-3 w-36">Nomor Surat</th>
-                                <th class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wide px-3 py-3 w-24">Jenis</th>
-                                <th class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wide px-3 py-3">Perihal</th>
-                                <th class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wide px-3 py-3 w-36">Pengirim / Penerima</th>
-                                <th class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wide px-3 py-3 w-28">Tanggal</th>
-                                <th class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wide px-3 py-3 w-24">Status</th>
-                                <th class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wide px-3 py-3 w-8">File</th>
-                                <th class="px-3 py-3 w-20"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template x-if="filteredSurat.length === 0">
-                                <tr>
-                                    <td colspan="8" class="text-center py-16">
-                                        <div class="flex flex-col items-center gap-3">
-                                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
-                                                <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <!-- Surat List -->
+                <div class="space-y-3 mb-8">
+                    <!-- Empty State -->
+                    <template x-if="filteredSurat.length === 0">
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                            <div class="text-center py-16">
+                                <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+                                    <i class="fa-solid fa-envelope-open text-3xl text-slate-300 dark:text-slate-600"></i>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">Tidak ada surat ditemukan</h3>
+                                <p class="text-sm text-slate-400 mb-4" x-show="search || filterJenis || filterStatus">Coba ubah filter pencarian</p>
+                                <button x-show="!search && !filterJenis && !filterStatus"
+                                        @click="openModal('add')"
+                                        class="px-6 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl transition-all">
+                                    <i class="fa-solid fa-plus mr-2"></i>Tambah Surat Pertama
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Surat Cards -->
+                    <template x-for="surat in filteredSurat" :key="surat.id">
+                        <div class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all overflow-hidden"
+                             :class="{
+                                 'hover:border-blue-300 dark:hover:border-blue-500/50':   surat.jenis_surat === 'masuk',
+                                 'hover:border-emerald-300 dark:hover:border-emerald-500/50': surat.jenis_surat === 'keluar',
+                                 'hover:border-amber-300 dark:hover:border-amber-500/50':  surat.jenis_surat === 'internal',
+                                 'hover:border-purple-300 dark:hover:border-purple-500/50': surat.jenis_surat === 'sk',
+                             }">
+                            <div class="p-5 flex items-start gap-4">
+                                <!-- Icon -->
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 group-hover:scale-110 transition-transform"
+                                     :class="iconBg(surat.jenis_surat)">
+                                    <i class="text-white text-lg" :class="iconClass(surat.jenis_surat)"></i>
+                                </div>
+
+                                <!-- Content -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-start justify-between gap-3 flex-wrap">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 flex-wrap mb-1">
+                                                <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded-lg"
+                                                      :class="badgeBg(surat.jenis_surat)"
+                                                      x-text="surat.nomor_surat"></span>
+                                                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                                                      :class="statusBadge(surat.status)"
+                                                      x-text="surat.status"></span>
                                             </div>
-                                            <p class="text-sm font-medium text-slate-500">Tidak ada surat ditemukan</p>
-                                            <p class="text-xs text-slate-400" x-show="search || filterJenis || filterStatus">Coba ubah filter pencarian</p>
-                                            <button x-show="!search && !filterJenis && !filterStatus" @click="openModal('add')"
-                                                    class="text-xs text-slate-900 font-medium hover:underline">+ Tambah surat pertama</button>
+                                            <h3 class="text-base font-bold text-slate-900 dark:text-white truncate" x-text="surat.perihal"></h3>
+                                            <div class="flex items-center gap-3 mt-1 flex-wrap text-xs text-slate-500 dark:text-slate-400">
+                                                <span x-show="surat.instansi" class="flex items-center gap-1">
+                                                    <i class="fa-solid fa-building"></i>
+                                                    <span x-text="surat.instansi"></span>
+                                                </span>
+                                                <span x-show="surat.jenis_surat !== 'keluar' && surat.pengirim" class="flex items-center gap-1">
+                                                    <i class="fa-solid fa-user"></i>
+                                                    <span x-text="surat.pengirim"></span>
+                                                </span>
+                                                <span x-show="surat.jenis_surat === 'keluar' && surat.penerima" class="flex items-center gap-1">
+                                                    <i class="fa-solid fa-user"></i>
+                                                    <span x-text="surat.penerima"></span>
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <i class="fa-solid fa-calendar-day"></i>
+                                                    <span x-text="formatTanggal(surat.tanggal_surat)"></span>
+                                                </span>
+                                            </div>
+                                            <p x-show="surat.keterangan" class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 line-clamp-1" x-text="surat.keterangan"></p>
                                         </div>
-                                    </td>
-                                </tr>
-                            </template>
-                            <template x-for="surat in filteredSurat" :key="surat.id">
-                                <tr class="table-row border-b border-slate-50 last:border-0">
-                                    <td class="px-5 py-3.5">
-                                        <span class="font-mono text-xs text-slate-700 font-medium" x-text="surat.nomor_surat"></span>
-                                    </td>
-                                    <td class="px-3 py-3.5">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium"
-                                              :class="badgeJenis(surat.jenis_surat)"
-                                              x-text="labelJenis(surat.jenis_surat)"></span>
-                                    </td>
-                                    <td class="px-3 py-3.5">
-                                        <p class="text-slate-800 font-medium text-sm leading-snug" x-text="surat.perihal"></p>
-                                        <p class="text-xs text-slate-400 mt-0.5" x-show="surat.instansi" x-text="surat.instansi"></p>
-                                    </td>
-                                    <td class="px-3 py-3.5">
-                                        <p class="text-xs text-slate-600"
-                                           x-text="surat.jenis_surat === 'keluar' ? (surat.penerima || '—') : (surat.pengirim || '—')"></p>
-                                    </td>
-                                    <td class="px-3 py-3.5">
-                                        <p class="text-xs text-slate-600" x-text="formatTanggal(surat.tanggal_surat)"></p>
-                                    </td>
-                                    <td class="px-3 py-3.5">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium capitalize"
-                                              :class="badgeStatus(surat.status)"
-                                              x-text="surat.status"></span>
-                                    </td>
-                                    <td class="px-3 py-3.5">
-                                        <template x-if="surat.file_path">
-                                            <a :href="'/surat-menyurat/' + surat.id + '/preview'" target="_blank"
-                                               class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors text-slate-500 hover:text-slate-700">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            </a>
-                                        </template>
-                                        <template x-if="!surat.file_path">
-                                            <span class="text-slate-300">—</span>
-                                        </template>
-                                    </td>
-                                    <td class="px-3 py-3.5">
-                                        <div class="flex items-center gap-1 justify-end">
+
+                                        <!-- Actions -->
+                                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                                            <template x-if="surat.file_path">
+                                                <a :href="'/surat-menyurat/' + surat.id + '/preview'" target="_blank"
+                                                   class="w-9 h-9 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-500/10 text-slate-400 hover:text-blue-500 flex items-center justify-center transition-all hover:scale-110"
+                                                   title="Preview Lampiran">
+                                                    <i class="fa-solid fa-eye text-sm"></i>
+                                                </a>
+                                            </template>
                                             <button @click="openModal('edit', surat)"
-                                                    class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors text-slate-400 hover:text-slate-700">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                    class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center transition-all hover:scale-110"
+                                                    title="Edit">
+                                                <i class="fa-solid fa-pen text-sm"></i>
                                             </button>
                                             <button @click="confirmDelete(surat)"
-                                                    class="w-7 h-7 rounded-lg hover:bg-red-50 flex items-center justify-center transition-colors text-slate-400 hover:text-red-500">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    class="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500 dark:text-red-400 flex items-center justify-center transition-all hover:scale-110"
+                                                    title="Hapus">
+                                                <i class="fa-solid fa-trash text-sm"></i>
                                             </button>
                                         </div>
-                                    </td>
-                                </tr>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- File indicator bar -->
+                            <template x-if="surat.file_path">
+                                <div class="px-5 pb-3 -mt-2">
+                                    <div class="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+                                        <i class="fa-solid fa-paperclip"></i>
+                                        <span x-text="surat.file_name"></span>
+                                    </div>
+                                </div>
                             </template>
-                        </tbody>
-                    </table>
+                        </div>
+                    </template>
                 </div>
 
-                {{-- Table Footer --}}
-                <div class="px-5 py-3 border-t border-slate-100 flex items-center justify-between">
-                    <p class="text-xs text-slate-400">
-                        <span x-text="filteredSurat.length"></span> dari <span x-text="suratList.length"></span> surat
-                    </p>
+                <!-- Footer count -->
+                <p class="text-sm text-slate-400 dark:text-slate-500 text-center pb-4">
+                    Menampilkan <span class="font-semibold text-slate-600 dark:text-slate-300" x-text="filteredSurat.length"></span>
+                    dari <span class="font-semibold" x-text="suratList.length"></span> surat
+                </p>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ===== MODAL ADD / EDIT ===== -->
+    <div x-show="showModal"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+         @click.self="closeModal()"
+         style="display:none;">
+        <div x-show="showModal"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-90"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-90"
+             class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col relative overflow-hidden">
+
+            <!-- Top accent bar -->
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500"></div>
+
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-7 pt-7 pb-5 flex-shrink-0">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white"
+                        x-text="modalMode === 'add' ? 'Tambah Surat Baru' : 'Edit Surat'"></h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5"
+                       x-text="modalMode === 'add' ? 'Nomor surat digenerate otomatis' : 'Perbarui informasi surat'"></p>
                 </div>
+                <button @click="closeModal()"
+                        class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-red-100 dark:hover:bg-red-500/20 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark text-slate-400 hover:text-red-500 text-sm"></i>
+                </button>
             </div>
 
-        </div>{{-- end body --}}
-    </main>
-</div>
-
-{{-- ===================== MODAL ADD / EDIT ===================== --}}
-<div x-show="showModal" x-cloak
-     class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop no-print"
-     @keydown.escape.window="closeModal()">
-
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
-         @click.outside="closeModal()">
-
-        {{-- Modal Header --}}
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 flex-shrink-0">
-            <div>
-                <h2 class="text-base font-semibold text-slate-900"
-                    x-text="modalMode === 'add' ? 'Tambah Surat Baru' : 'Edit Surat'"></h2>
-                <p class="text-xs text-slate-400 mt-0.5"
-                   x-text="modalMode === 'add' ? 'Nomor surat akan digenerate otomatis' : 'Perbarui data surat'"></p>
-            </div>
-            <button @click="closeModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-
-        {{-- Modal Body --}}
-        <div class="overflow-y-auto flex-1 px-6 py-5">
-            <form @submit.prevent="submitForm()" enctype="multipart/form-data" id="suratForm">
+            <!-- Modal Body -->
+            <div class="overflow-y-auto flex-1 px-7 pb-5">
                 <div class="grid grid-cols-2 gap-4">
 
-                    {{-- Jenis Surat --}}
+                    <!-- Jenis Surat -->
                     <div class="col-span-2 sm:col-span-1">
-                        <label class="block text-xs font-medium text-slate-700 mb-1.5">Jenis Surat <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Jenis Surat <span class="text-red-500">*</span></label>
                         <select x-model="form.jenis_surat" required
-                                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 bg-white text-slate-700">
+                                class="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white transition-all">
                             <option value="">— Pilih Jenis —</option>
                             <option value="masuk">Surat Masuk</option>
                             <option value="keluar">Surat Keluar</option>
@@ -400,11 +370,11 @@
                         </select>
                     </div>
 
-                    {{-- Status --}}
+                    <!-- Status -->
                     <div class="col-span-2 sm:col-span-1">
-                        <label class="block text-xs font-medium text-slate-700 mb-1.5">Status</label>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Status</label>
                         <select x-model="form.status"
-                                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 bg-white text-slate-700">
+                                class="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white transition-all">
                             <option value="draft">Draft</option>
                             <option value="terkirim">Terkirim</option>
                             <option value="diterima">Diterima</option>
@@ -413,70 +383,71 @@
                         </select>
                     </div>
 
-                    {{-- Perihal --}}
+                    <!-- Perihal -->
                     <div class="col-span-2">
-                        <label class="block text-xs font-medium text-slate-700 mb-1.5">Perihal <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Perihal <span class="text-red-500">*</span></label>
                         <input type="text" x-model="form.perihal" required maxlength="500"
                                placeholder="Perihal surat..."
-                               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300">
+                               class="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white transition-all">
                     </div>
 
-                    {{-- Tanggal Surat --}}
+                    <!-- Tanggal Surat -->
                     <div class="col-span-2 sm:col-span-1">
-                        <label class="block text-xs font-medium text-slate-700 mb-1.5">Tanggal Surat <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Tanggal Surat <span class="text-red-500">*</span></label>
                         <input type="date" x-model="form.tanggal_surat" required
-                               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300">
+                               class="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white transition-all">
                     </div>
 
-                    {{-- Tanggal Diterima (hanya surat masuk) --}}
-                    <div class="col-span-2 sm:col-span-1" x-show="form.jenis_surat === 'masuk'">
-                        <label class="block text-xs font-medium text-slate-700 mb-1.5">Tanggal Diterima</label>
+                    <!-- Tanggal Diterima (surat masuk) -->
+                    <div class="col-span-2 sm:col-span-1" x-show="form.jenis_surat === 'masuk'" x-cloak>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Tanggal Diterima</label>
                         <input type="date" x-model="form.tanggal_diterima"
-                               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300">
+                               class="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white transition-all">
                     </div>
 
-                    {{-- Pengirim (masuk & internal) --}}
+                    <!-- Pengirim -->
                     <div class="col-span-2 sm:col-span-1"
-                         x-show="form.jenis_surat === 'masuk' || form.jenis_surat === 'internal' || form.jenis_surat === 'sk'">
-                        <label class="block text-xs font-medium text-slate-700 mb-1.5"
+                         x-show="form.jenis_surat === 'masuk' || form.jenis_surat === 'internal' || form.jenis_surat === 'sk'" x-cloak>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider"
                                x-text="form.jenis_surat === 'internal' ? 'Dari (Divisi/Orang)' : 'Pengirim'"></label>
                         <input type="text" x-model="form.pengirim" maxlength="255"
-                               :placeholder="form.jenis_surat === 'internal' ? 'Nama divisi atau orang...' : 'Nama pengirim...'"
-                               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300">
+                               placeholder="Nama pengirim..."
+                               class="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white transition-all">
                     </div>
 
-                    {{-- Penerima (keluar & internal) --}}
+                    <!-- Penerima -->
                     <div class="col-span-2 sm:col-span-1"
-                         x-show="form.jenis_surat === 'keluar' || form.jenis_surat === 'internal'">
-                        <label class="block text-xs font-medium text-slate-700 mb-1.5"
+                         x-show="form.jenis_surat === 'keluar' || form.jenis_surat === 'internal'" x-cloak>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider"
                                x-text="form.jenis_surat === 'internal' ? 'Kepada (Divisi/Orang)' : 'Penerima'"></label>
                         <input type="text" x-model="form.penerima" maxlength="255"
-                               :placeholder="form.jenis_surat === 'internal' ? 'Nama divisi atau orang...' : 'Nama penerima...'"
-                               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300">
+                               placeholder="Nama penerima..."
+                               class="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white transition-all">
                     </div>
 
-                    {{-- Instansi --}}
-                    <div class="col-span-2" x-show="form.jenis_surat === 'masuk' || form.jenis_surat === 'keluar'">
-                        <label class="block text-xs font-medium text-slate-700 mb-1.5"
+                    <!-- Instansi -->
+                    <div class="col-span-2"
+                         x-show="form.jenis_surat === 'masuk' || form.jenis_surat === 'keluar'" x-cloak>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider"
                                x-text="form.jenis_surat === 'keluar' ? 'Instansi / Tujuan' : 'Asal Instansi'"></label>
                         <input type="text" x-model="form.instansi" maxlength="255"
                                placeholder="Nama instansi / perusahaan..."
-                               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300">
+                               class="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white transition-all">
                     </div>
 
-                    {{-- Keterangan --}}
+                    <!-- Keterangan -->
                     <div class="col-span-2">
-                        <label class="block text-xs font-medium text-slate-700 mb-1.5">Keterangan</label>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Keterangan</label>
                         <textarea x-model="form.keterangan" rows="2" maxlength="1000"
                                   placeholder="Catatan tambahan (opsional)..."
-                                  class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 resize-none"></textarea>
+                                  class="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white transition-all resize-none"></textarea>
                     </div>
 
-                    {{-- Upload File --}}
+                    <!-- Upload File -->
                     <div class="col-span-2">
-                        <label class="block text-xs font-medium text-slate-700 mb-1.5">Lampiran Surat</label>
-                        <div class="drop-zone rounded-lg p-4 text-center cursor-pointer relative"
-                             :class="dragOver ? 'active' : ''"
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Lampiran Surat</label>
+                        <div class="border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all"
+                             :class="dragOver ? 'border-rose-400 bg-rose-50 dark:bg-rose-500/10' : 'border-slate-200 dark:border-slate-700 hover:border-rose-300 dark:hover:border-rose-500/50'"
                              @dragover.prevent="dragOver = true"
                              @dragleave.prevent="dragOver = false"
                              @drop.prevent="handleDrop($event)"
@@ -486,303 +457,280 @@
                                    @change="handleFileSelect($event)">
                             <template x-if="!selectedFile">
                                 <div>
-                                    <svg class="w-7 h-7 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                                    <p class="text-xs text-slate-500">Drag & drop atau <span class="text-slate-700 font-medium">klik untuk pilih file</span></p>
-                                    <p class="text-[10px] text-slate-400 mt-1">PDF, JPG, PNG, DOC, DOCX — maks 10MB</p>
+                                    <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3">
+                                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400"></i>
+                                    </div>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400">Drag & drop atau <span class="text-rose-500 font-semibold">klik untuk pilih file</span></p>
+                                    <p class="text-xs text-slate-400 mt-1">PDF, JPG, PNG, DOC, DOCX — maks 10MB</p>
                                     <template x-if="editingItem && editingItem.file_path">
-                                        <p class="text-[10px] text-blue-500 mt-1">File saat ini: <span x-text="editingItem.file_name"></span></p>
+                                        <p class="text-xs text-blue-500 mt-2">
+                                            <i class="fa-solid fa-paperclip mr-1"></i>
+                                            File saat ini: <span x-text="editingItem.file_name" class="font-medium"></span>
+                                        </p>
                                     </template>
                                 </div>
                             </template>
                             <template x-if="selectedFile">
-                                <div class="flex items-center justify-center gap-3">
-                                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <div class="flex items-center justify-center gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center">
+                                        <i class="fa-solid fa-file text-rose-500"></i>
                                     </div>
                                     <div class="text-left">
-                                        <p class="text-xs font-medium text-slate-700" x-text="selectedFile.name"></p>
-                                        <p class="text-[10px] text-slate-400" x-text="formatFileSize(selectedFile.size)"></p>
+                                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-300" x-text="selectedFile.name"></p>
+                                        <p class="text-xs text-slate-400" x-text="formatFileSize(selectedFile.size)"></p>
                                     </div>
                                     <button type="button" @click.stop="selectedFile = null; $refs.fileInput.value = ''"
-                                            class="ml-2 text-slate-400 hover:text-red-500 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            class="w-7 h-7 rounded-full bg-red-100 dark:bg-red-500/20 text-red-500 flex items-center justify-center hover:bg-red-200 transition-all">
+                                        <i class="fa-solid fa-xmark text-xs"></i>
                                     </button>
                                 </div>
                             </template>
                         </div>
                     </div>
 
-                </div>{{-- end grid --}}
-            </form>
-        </div>
-
-        {{-- Modal Footer --}}
-        <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3 flex-shrink-0">
-            <button type="button" @click="closeModal()"
-                    class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
-                Batal
-            </button>
-            <button type="button" @click="submitForm()" :disabled="submitting"
-                    class="flex items-center gap-2 px-5 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg x-show="submitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-                <span x-text="submitting ? 'Menyimpan...' : (modalMode === 'add' ? 'Simpan Surat' : 'Perbarui')"></span>
-            </button>
-        </div>
-    </div>
-</div>
-
-{{-- ===================== MODAL KONFIRMASI HAPUS ===================== --}}
-<div x-show="showDeleteModal" x-cloak
-     class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop no-print"
-     @keydown.escape.window="showDeleteModal = false">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6" @click.outside="showDeleteModal = false">
-        <div class="flex items-start gap-4">
-            <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
             </div>
-            <div class="flex-1">
-                <h3 class="text-sm font-semibold text-slate-900">Hapus Surat?</h3>
-                <p class="text-xs text-slate-500 mt-1">Surat <strong x-text="deletingItem?.nomor_surat"></strong> akan dihapus permanen beserta filenya.</p>
+
+            <!-- Modal Footer -->
+            <div class="px-7 py-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3 flex-shrink-0">
+                <button type="button" @click="closeModal()"
+                        class="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">
+                    Batal
+                </button>
+                <button type="button" @click="submitForm()" :disabled="submitting"
+                        class="px-6 py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 text-white text-sm font-semibold rounded-xl shadow-lg shadow-rose-500/30 hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2">
+                    <span x-show="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span x-text="submitting ? 'Menyimpan...' : (modalMode === 'add' ? 'Simpan Surat' : 'Perbarui')"></span>
+                </button>
             </div>
         </div>
-        <div class="flex justify-end gap-3 mt-5">
-            <button @click="showDeleteModal = false"
-                    class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
-                Batal
-            </button>
-            <button @click="deleteSurat()" :disabled="submitting"
-                    class="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50">
-                <span x-text="submitting ? 'Menghapus...' : 'Hapus'"></span>
-            </button>
+    </div>
+
+    <!-- ===== MODAL KONFIRMASI HAPUS ===== -->
+    <div x-show="showDeleteModal"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+         @click.self="showDeleteModal = false"
+         style="display:none;">
+        <div x-show="showDeleteModal"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-90"
+             x-transition:enter-end="opacity-100 scale-100"
+             class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-sm p-7 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-500 to-orange-500"></div>
+            <div class="flex items-start gap-4 mb-5">
+                <div class="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Hapus Surat?</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                        Surat <strong class="text-slate-700 dark:text-slate-300" x-text="deletingItem?.nomor_surat"></strong> beserta lampiran filenya akan dihapus permanen.
+                    </p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button @click="showDeleteModal = false"
+                        class="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">
+                    Batal
+                </button>
+                <button @click="deleteSurat()" :disabled="submitting"
+                        class="px-5 py-2.5 bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-red-500/30 hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2">
+                    <span x-show="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span x-text="submitting ? 'Menghapus...' : 'Ya, Hapus'"></span>
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-{{-- ===================== ALPINE JS ===================== --}}
-<script>
-function suratApp() {
-    return {
-        // Data
-        suratList: @json($suratList),
+    <!-- ===== TOAST ===== -->
+    <div class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2">
+        <template x-for="toast in toasts" :key="toast.id">
+            <div class="flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium max-w-xs border"
+                 :class="toast.type === 'success'
+                     ? 'bg-white dark:bg-slate-900 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
+                     : 'bg-white dark:bg-slate-900 border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-300'"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
+                <i :class="toast.type === 'success' ? 'fa-solid fa-circle-check text-emerald-500' : 'fa-solid fa-circle-xmark text-red-500'"></i>
+                <span x-text="toast.message"></span>
+            </div>
+        </template>
+    </div>
 
-        // UI state
-        search: '',
-        filterJenis: '',
-        filterStatus: '',
-        showModal: false,
-        showDeleteModal: false,
-        modalMode: 'add',
-        submitting: false,
-        dragOver: false,
-        selectedFile: null,
-        editingItem: null,
-        deletingItem: null,
-        toasts: [],
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 
-        // Form state
-        form: {
-            jenis_surat: '',
-            perihal: '',
-            tanggal_surat: '',
-            tanggal_diterima: '',
-            pengirim: '',
-            penerima: '',
-            instansi: '',
-            status: 'draft',
-            keterangan: '',
-        },
+    <script>
+    function suratApp() {
+        return {
+            sidebarCollapsed: false,
+            suratList: @json($suratList),
+            search: '',
+            filterJenis: '',
+            filterStatus: '',
+            showModal: false,
+            showDeleteModal: false,
+            modalMode: 'add',
+            submitting: false,
+            dragOver: false,
+            selectedFile: null,
+            editingItem: null,
+            deletingItem: null,
+            toasts: [],
+            form: {
+                jenis_surat: '', perihal: '', tanggal_surat: '',
+                tanggal_diterima: '', pengirim: '', penerima: '',
+                instansi: '', status: 'draft', keterangan: '',
+            },
 
-        init() {
-            // sort by tanggal_surat desc on load
-            this.suratList.sort((a, b) => new Date(b.tanggal_surat) - new Date(a.tanggal_surat));
-        },
+            init() {
+                this.suratList.sort((a, b) => new Date(b.tanggal_surat) - new Date(a.tanggal_surat));
+            },
 
-        // ---- Computed ----
-        get filteredSurat() {
-            return this.suratList.filter(s => {
-                const q = this.search.toLowerCase();
-                const matchSearch = !q
-                    || (s.nomor_surat || '').toLowerCase().includes(q)
-                    || (s.perihal || '').toLowerCase().includes(q)
-                    || (s.instansi || '').toLowerCase().includes(q)
-                    || (s.pengirim || '').toLowerCase().includes(q)
-                    || (s.penerima || '').toLowerCase().includes(q);
-                const matchJenis  = !this.filterJenis  || s.jenis_surat === this.filterJenis;
-                const matchStatus = !this.filterStatus || s.status === this.filterStatus;
-                return matchSearch && matchJenis && matchStatus;
-            });
-        },
-
-        // ---- Helpers ----
-        labelJenis(jenis) {
-            return { masuk: 'Masuk', keluar: 'Keluar', internal: 'Internal', sk: 'SK' }[jenis] || jenis;
-        },
-        badgeJenis(jenis) {
-            return {
-                masuk:    'badge-masuk',
-                keluar:   'badge-keluar',
-                internal: 'badge-internal',
-                sk:       'badge-sk',
-            }[jenis] || '';
-        },
-        badgeStatus(status) {
-            return {
-                draft:      'status-draft',
-                terkirim:   'status-terkirim',
-                diterima:   'status-diterima',
-                dibalas:    'status-dibalas',
-                diarsipkan: 'status-diarsipkan',
-            }[status] || 'status-draft';
-        },
-        formatTanggal(str) {
-            if (!str) return '—';
-            const d = new Date(str + 'T00:00:00');
-            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-        },
-        formatFileSize(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-            return (bytes / 1048576).toFixed(1) + ' MB';
-        },
-
-        // ---- Modal ----
-        openModal(mode, item = null) {
-            this.modalMode = mode;
-            this.selectedFile = null;
-            if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-            if (mode === 'add') {
-                this.editingItem = null;
-                this.form = {
-                    jenis_surat: '',
-                    perihal: '',
-                    tanggal_surat: new Date().toISOString().slice(0, 10),
-                    tanggal_diterima: '',
-                    pengirim: '',
-                    penerima: '',
-                    instansi: '',
-                    status: 'draft',
-                    keterangan: '',
-                };
-            } else {
-                this.editingItem = item;
-                this.form = {
-                    jenis_surat:      item.jenis_surat || '',
-                    perihal:          item.perihal || '',
-                    tanggal_surat:    item.tanggal_surat ? item.tanggal_surat.substring(0, 10) : '',
-                    tanggal_diterima: item.tanggal_diterima ? item.tanggal_diterima.substring(0, 10) : '',
-                    pengirim:         item.pengirim || '',
-                    penerima:         item.penerima || '',
-                    instansi:         item.instansi || '',
-                    status:           item.status || 'draft',
-                    keterangan:       item.keterangan || '',
-                };
-            }
-            this.showModal = true;
-        },
-        closeModal() {
-            this.showModal = false;
-            this.editingItem = null;
-            this.selectedFile = null;
-        },
-
-        // ---- File handling ----
-        handleDrop(event) {
-            this.dragOver = false;
-            const file = event.dataTransfer.files[0];
-            if (file) this.selectedFile = file;
-        },
-        handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) this.selectedFile = file;
-        },
-
-        // ---- Submit ----
-        async submitForm() {
-            if (!this.form.jenis_surat || !this.form.perihal || !this.form.tanggal_surat) {
-                this.showToast('Harap lengkapi field yang wajib diisi.', 'error');
-                return;
-            }
-
-            this.submitting = true;
-            const fd = new FormData();
-            Object.entries(this.form).forEach(([k, v]) => {
-                if (v !== null && v !== undefined && v !== '') fd.append(k, v);
-            });
-            if (this.selectedFile) fd.append('file', this.selectedFile);
-
-            const isEdit = this.modalMode === 'edit';
-            if (isEdit) fd.append('_method', 'PUT');
-
-            const url = isEdit
-                ? `/surat-menyurat/${this.editingItem.id}`
-                : '/surat-menyurat';
-
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                    body: fd,
+            get filteredSurat() {
+                return this.suratList.filter(s => {
+                    const q = this.search.toLowerCase();
+                    const matchSearch = !q
+                        || (s.nomor_surat||'').toLowerCase().includes(q)
+                        || (s.perihal||'').toLowerCase().includes(q)
+                        || (s.instansi||'').toLowerCase().includes(q)
+                        || (s.pengirim||'').toLowerCase().includes(q)
+                        || (s.penerima||'').toLowerCase().includes(q);
+                    const matchJenis  = !this.filterJenis  || s.jenis_surat === this.filterJenis;
+                    const matchStatus = !this.filterStatus || s.status === this.filterStatus;
+                    return matchSearch && matchJenis && matchStatus;
                 });
-                const data = await res.json();
+            },
 
-                if (data.success) {
-                    this.showToast(data.message, 'success');
-                    this.closeModal();
-                    // Reload page to reflect changes
-                    setTimeout(() => window.location.reload(), 600);
+            iconBg(jenis) {
+                return {
+                    masuk:    'bg-gradient-to-br from-blue-500 to-cyan-500 shadow-blue-500/30',
+                    keluar:   'bg-gradient-to-br from-emerald-500 to-green-500 shadow-emerald-500/30',
+                    internal: 'bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-500/30',
+                    sk:       'bg-gradient-to-br from-purple-500 to-pink-500 shadow-purple-500/30',
+                }[jenis] || 'bg-gradient-to-br from-slate-500 to-slate-600';
+            },
+            iconClass(jenis) {
+                return {
+                    masuk:    'fa-solid fa-envelope',
+                    keluar:   'fa-solid fa-paper-plane',
+                    internal: 'fa-solid fa-comments',
+                    sk:       'fa-solid fa-certificate',
+                }[jenis] || 'fa-solid fa-file';
+            },
+            badgeBg(jenis) {
+                return {
+                    masuk:    'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300',
+                    keluar:   'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300',
+                    internal: 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300',
+                    sk:       'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300',
+                }[jenis] || 'bg-slate-100 text-slate-600';
+            },
+            statusBadge(status) {
+                return {
+                    draft:      'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300',
+                    terkirim:   'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300',
+                    diterima:   'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300',
+                    dibalas:    'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300',
+                    diarsipkan: 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300',
+                }[status] || 'bg-slate-100 text-slate-600';
+            },
+            formatTanggal(str) {
+                if (!str) return '—';
+                return new Date(str + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+            },
+            formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+                return (bytes / 1048576).toFixed(1) + ' MB';
+            },
+
+            openModal(mode, item = null) {
+                this.modalMode = mode;
+                this.selectedFile = null;
+                if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+                if (mode === 'add') {
+                    this.editingItem = null;
+                    this.form = { jenis_surat: '', perihal: '', tanggal_surat: new Date().toISOString().slice(0,10), tanggal_diterima: '', pengirim: '', penerima: '', instansi: '', status: 'draft', keterangan: '' };
                 } else {
-                    this.showToast(data.message || 'Terjadi kesalahan.', 'error');
+                    this.editingItem = item;
+                    this.form = {
+                        jenis_surat: item.jenis_surat||'', perihal: item.perihal||'',
+                        tanggal_surat: item.tanggal_surat ? item.tanggal_surat.substring(0,10) : '',
+                        tanggal_diterima: item.tanggal_diterima ? item.tanggal_diterima.substring(0,10) : '',
+                        pengirim: item.pengirim||'', penerima: item.penerima||'',
+                        instansi: item.instansi||'', status: item.status||'draft', keterangan: item.keterangan||'',
+                    };
                 }
-            } catch (e) {
-                this.showToast('Gagal terhubung ke server.', 'error');
-            } finally {
-                this.submitting = false;
-            }
-        },
+                this.showModal = true;
+            },
+            closeModal() { this.showModal = false; this.editingItem = null; this.selectedFile = null; },
 
-        // ---- Delete ----
-        confirmDelete(item) {
-            this.deletingItem = item;
-            this.showDeleteModal = true;
-        },
-        async deleteSurat() {
-            if (!this.deletingItem) return;
-            this.submitting = true;
-            try {
-                const res = await fetch(`/surat-menyurat/${this.deletingItem.id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                    },
-                });
-                const data = await res.json();
-                if (data.success) {
-                    this.showToast(data.message, 'success');
-                    this.showDeleteModal = false;
-                    this.suratList = this.suratList.filter(s => s.id !== this.deletingItem.id);
-                    this.deletingItem = null;
-                } else {
-                    this.showToast(data.message || 'Gagal menghapus surat.', 'error');
+            handleDrop(e) { this.dragOver = false; const f = e.dataTransfer.files[0]; if (f) this.selectedFile = f; },
+            handleFileSelect(e) { const f = e.target.files[0]; if (f) this.selectedFile = f; },
+
+            async submitForm() {
+                if (!this.form.jenis_surat || !this.form.perihal || !this.form.tanggal_surat) {
+                    this.showToast('Harap lengkapi field yang wajib diisi.', 'error'); return;
                 }
-            } catch (e) {
-                this.showToast('Gagal terhubung ke server.', 'error');
-            } finally {
+                this.submitting = true;
+                const fd = new FormData();
+                Object.entries(this.form).forEach(([k, v]) => { if (v !== null && v !== undefined && v !== '') fd.append(k, v); });
+                if (this.selectedFile) fd.append('file', this.selectedFile);
+                const isEdit = this.modalMode === 'edit';
+                if (isEdit) fd.append('_method', 'PUT');
+                try {
+                    const res = await fetch(isEdit ? `/surat-menyurat/${this.editingItem.id}` : '/surat-menyurat', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                        body: fd,
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.showToast(data.message, 'success');
+                        this.closeModal();
+                        setTimeout(() => window.location.reload(), 700);
+                    } else {
+                        this.showToast(data.message || 'Terjadi kesalahan.', 'error');
+                    }
+                } catch (e) { this.showToast('Gagal terhubung ke server.', 'error'); }
                 this.submitting = false;
-            }
-        },
+            },
 
-        // ---- Toast ----
-        showToast(message, type = 'success') {
-            const id = Date.now();
-            this.toasts.push({ id, message, type });
-            setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 3500);
-        },
-    };
-}
-</script>
-</body>
-</html>
+            confirmDelete(item) { this.deletingItem = item; this.showDeleteModal = true; },
+            async deleteSurat() {
+                if (!this.deletingItem) return;
+                this.submitting = true;
+                try {
+                    const res = await fetch(`/surat-menyurat/${this.deletingItem.id}`, {
+                        method: 'DELETE',
+                        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.showToast(data.message, 'success');
+                        this.showDeleteModal = false;
+                        this.suratList = this.suratList.filter(s => s.id !== this.deletingItem.id);
+                        this.deletingItem = null;
+                    } else { this.showToast(data.message || 'Gagal menghapus.', 'error'); }
+                } catch (e) { this.showToast('Gagal terhubung ke server.', 'error'); }
+                this.submitting = false;
+            },
+
+            showToast(message, type = 'success') {
+                const id = Date.now();
+                this.toasts.push({ id, message, type });
+                setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 3500);
+            },
+        };
+    }
+    </script>
+</x-app-layout>
