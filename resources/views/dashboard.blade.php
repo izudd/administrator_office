@@ -256,6 +256,13 @@
                     <span x-show="!sidebarCollapsed" class="ml-3">Inventory</span>
                 </a>
 
+                <a href="{{ route('surat-menyurat.index') }}" class="group flex items-center px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all duration-200">
+                    <div class="w-9 h-9 rounded-lg bg-slate-800 group-hover:bg-rose-500 flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-rose-500/30 group-hover:scale-110">
+                        <i class="fa-solid fa-envelope-open-text text-sm"></i>
+                    </div>
+                    <span x-show="!sidebarCollapsed" class="ml-3">Surat Menyurat</span>
+                </a>
+
             </nav>
 
             <!-- User Section -->
@@ -684,6 +691,30 @@
                             </div>
                         </div>
 
+                        <!-- Surat Menyurat -->
+                        @php $suratCount = 0; try { $suratCount = \App\Models\SuratMenyurat::count(); } catch (\Exception $e) {} @endphp
+                        <div @click="openPin('surat-menyurat', 'Surat Menyurat', '{{ route('surat-menyurat.index') }}')" class="cursor-pointer group relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-rose-400 dark:hover:border-rose-500 transition-all hover:shadow-2xl hover:shadow-rose-500/10 overflow-hidden">
+                            <div class="absolute top-3 right-3 z-10"><i class="fa-solid fa-lock text-slate-300 dark:text-slate-600 text-sm"></i></div>
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-rose-500/10 to-pink-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center shadow-xl shadow-rose-500/30 group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-envelope-open-text text-white text-xl"></i>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-2xl font-bold text-slate-900 dark:text-white">{{ $suratCount }}</span>
+                                        <p class="text-xs text-slate-500">surat</p>
+                                    </div>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">Surat Menyurat</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Surat masuk, keluar, internal & SK</p>
+                                <div class="flex items-center justify-between text-xs text-slate-500">
+                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-inbox"></i> Nomor otomatis</span>
+                                    <button @click.stop="openChangePin('surat-menyurat', 'Surat Menyurat')" class="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 font-medium flex items-center gap-1"><i class="fa-solid fa-key text-[10px]"></i> Ubah PIN</button>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -930,6 +961,10 @@
                 <a href="{{ route('partner-documents.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
                     <i class="fa-solid fa-handshake w-5"></i>
                     <span>Partner Docs</span>
+                </a>
+                <a href="{{ route('surat-menyurat.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-envelope-open-text w-5"></i>
+                    <span>Surat Menyurat</span>
                 </a>
             </nav>
 

@@ -9,6 +9,7 @@ use App\Http\Controllers\EmployeeLegalController;
 use App\Http\Controllers\EmployeeDocumentController;
 use App\Http\Controllers\ManagementDocumentController;
 use App\Http\Controllers\ModulePinController;
+use App\Http\Controllers\SuratMenyuratController;
 
 /*
 |--------------------------------------------------------------------------
@@ -130,6 +131,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/employee-documents/{employeeId}/upload', [EmployeeDocumentController::class, 'uploadFile'])->name('employee-documents.upload');
         Route::delete('/employee-documents/files/{fileId}', [EmployeeDocumentController::class, 'deleteFile'])->name('employee-documents.files.delete');
         Route::get('/employee-documents/preview/{fileId}', [EmployeeDocumentController::class, 'previewFile'])->name('employee-documents.preview');
+    });
+
+    // Surat Menyurat Routes (PIN protected)
+    Route::middleware(['module.pin:surat-menyurat'])->group(function () {
+        Route::get('/surat-menyurat', [SuratMenyuratController::class, 'index'])->name('surat-menyurat.index');
+        Route::post('/surat-menyurat', [SuratMenyuratController::class, 'store'])->name('surat-menyurat.store');
+        Route::put('/surat-menyurat/{id}', [SuratMenyuratController::class, 'update'])->name('surat-menyurat.update');
+        Route::delete('/surat-menyurat/{id}', [SuratMenyuratController::class, 'destroy'])->name('surat-menyurat.destroy');
+        Route::get('/surat-menyurat/{id}/preview', [SuratMenyuratController::class, 'preview'])->name('surat-menyurat.preview');
+        Route::patch('/surat-menyurat/{id}/status', [SuratMenyuratController::class, 'updateStatus'])->name('surat-menyurat.status');
     });
 
     // Management Documents / Legal Management Routes (PIN protected)
