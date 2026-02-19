@@ -36,8 +36,7 @@
         }
     </script>
 
-    <!-- Scripts (Vite fallback) -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- Vite disabled: using CDN Tailwind + CDN Alpine instead --}}
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
