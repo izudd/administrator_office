@@ -314,9 +314,8 @@
 
             </div>
         </main>
-    </div>
 
-    <!-- ===== MODAL ADD / EDIT ===== -->
+        <!-- ===== MODAL ADD / EDIT ===== -->
     <div x-show="showModal"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
@@ -399,7 +398,7 @@
                     </div>
 
                     <!-- Tanggal Diterima (surat masuk) -->
-                    <div class="col-span-2 sm:col-span-1" x-show="form.jenis_surat === 'masuk'" x-cloak>
+                    <div class="col-span-2 sm:col-span-1" x-show="form.jenis_surat === 'masuk'">
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Tanggal Diterima</label>
                         <input type="date" x-model="form.tanggal_diterima"
                                class="w-full text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white transition-all">
@@ -407,7 +406,7 @@
 
                     <!-- Pengirim -->
                     <div class="col-span-2 sm:col-span-1"
-                         x-show="form.jenis_surat === 'masuk' || form.jenis_surat === 'internal' || form.jenis_surat === 'sk'" x-cloak>
+                         x-show="form.jenis_surat === 'masuk' || form.jenis_surat === 'internal' || form.jenis_surat === 'sk'">
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider"
                                x-text="form.jenis_surat === 'internal' ? 'Dari (Divisi/Orang)' : 'Pengirim'"></label>
                         <input type="text" x-model="form.pengirim" maxlength="255"
@@ -417,7 +416,7 @@
 
                     <!-- Penerima -->
                     <div class="col-span-2 sm:col-span-1"
-                         x-show="form.jenis_surat === 'keluar' || form.jenis_surat === 'internal'" x-cloak>
+                         x-show="form.jenis_surat === 'keluar' || form.jenis_surat === 'internal'">
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider"
                                x-text="form.jenis_surat === 'internal' ? 'Kepada (Divisi/Orang)' : 'Penerima'"></label>
                         <input type="text" x-model="form.penerima" maxlength="255"
@@ -427,7 +426,7 @@
 
                     <!-- Instansi -->
                     <div class="col-span-2"
-                         x-show="form.jenis_surat === 'masuk' || form.jenis_surat === 'keluar'" x-cloak>
+                         x-show="form.jenis_surat === 'masuk' || form.jenis_surat === 'keluar'">
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider"
                                x-text="form.jenis_surat === 'keluar' ? 'Instansi / Tujuan' : 'Asal Instansi'"></label>
                         <input type="text" x-model="form.instansi" maxlength="255"
@@ -546,23 +545,25 @@
                 </button>
             </div>
         </div>
-    </div>
+    </div>{{-- end modal hapus --}}
 
-    <!-- ===== TOAST ===== -->
-    <div class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2">
-        <template x-for="toast in toasts" :key="toast.id">
-            <div class="flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium max-w-xs border"
-                 :class="toast.type === 'success'
-                     ? 'bg-white dark:bg-slate-900 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
-                     : 'bg-white dark:bg-slate-900 border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-300'"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 translate-y-4"
-                 x-transition:enter-end="opacity-100 translate-y-0">
-                <i :class="toast.type === 'success' ? 'fa-solid fa-circle-check text-emerald-500' : 'fa-solid fa-circle-xmark text-red-500'"></i>
-                <span x-text="toast.message"></span>
-            </div>
-        </template>
-    </div>
+        <!-- ===== TOAST ===== -->
+        <div class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2">
+            <template x-for="toast in toasts" :key="toast.id">
+                <div class="flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium max-w-xs border"
+                     :class="toast.type === 'success'
+                         ? 'bg-white dark:bg-slate-900 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
+                         : 'bg-white dark:bg-slate-900 border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-300'"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-4"
+                     x-transition:enter-end="opacity-100 translate-y-0">
+                    <i :class="toast.type === 'success' ? 'fa-solid fa-circle-check text-emerald-500' : 'fa-solid fa-circle-xmark text-red-500'"></i>
+                    <span x-text="toast.message"></span>
+                </div>
+            </template>
+        </div>
+
+    </div>{{-- END x-data="suratApp()" --}}
 
     <style>
         [x-cloak] { display: none !important; }
